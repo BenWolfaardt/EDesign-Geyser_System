@@ -1,0 +1,18 @@
+A file containg all of the warnings I got when commiting the code to Git.
+
+Version 1.0
+
+warning: LF will be replaced by CRLF in .metadata/.log.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.cdt.make.core/specs.c.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.cdt.make.core/specs.cpp.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.cdt.ui/EDesign.build.log.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.cdt.ui/global-build.log.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.ltk.core.refactoring/.refactorings/.workspace/2018/2/8/refactorings.index.
+The file will have its original line endings in your working directory.
+warning: LF will be replaced by CRLF in .metadata/.plugins/org.eclipse.recommenders.news.impl/downloads/http%3A%2F%2Fsumba.atollic.com%2Frss%2Ftrueperspectives.xml.
+The file will have its original line endings in your working directory.
