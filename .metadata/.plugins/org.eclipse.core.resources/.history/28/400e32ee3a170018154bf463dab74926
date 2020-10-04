@@ -1,0 +1,12 @@
+/*
+ * globals.c
+ *
+ *  Created on: 21 Feb 2018
+ *      Author: 18321933
+ */
+
+#include "main.c"
+#include "user.c"
+
+volatile uint8_t temp;
+volatile uint8_t flag = 0U;
