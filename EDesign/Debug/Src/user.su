@@ -1,9 +1,7 @@
-user.c:32:6:UserInitialise	16	static
-user.c:129:9:String2Int	8	static
-user.c:159:9:Int2String	12	static
-user.c:203:6:resetAll	8	static
-user.c:90:6:DecodeCmd	8	static
-user.c:214:6:writeToPins	24	static
-user.c:62:6:User	8	static
-user.c:249:6:HAL_UART_RxCpltCallback	0	static
-user.c:256:6:HAL_SYSTICK_Callback	0	static
+main.c:191:13:MX_GPIO_Init	8	static
+main.c:200:6:HAL_UART_RxCpltCallback	0	static
+main.c:211:6:_Error_Handler	0	static
+main.c:169:13:MX_USART1_UART_Init	8	static
+main.c:117:6:SystemClock_Config	96	static
+user.c:10:6:userProcess	16	static
+main.c:70:5:main	8	static
