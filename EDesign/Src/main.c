@@ -53,6 +53,7 @@ volatile uint8_t uartRXFlag = 0U;
 uint8_t uartRXBuff[40];
 uint8_t uartTXBuff[40];
 uint8_t position;
+uint8_t getTemp[3];
 uint8_t buffer[40];
 /* USER CODE END PV */
 
@@ -123,18 +124,19 @@ int main(void)
 				case 'A':
 					uartTXBuff[0] = buffer[0];
 					uartTXBuff[1] = buffer[1];
-					uartTXBuff[2] = '1';
-					uartTXBuff[3] = '8';
-					uartTXBuff[4] = '3';
-					uartTXBuff[5] = '2';
-					uartTXBuff[6] = '1';
-					uartTXBuff[7] = '9';
-					uartTXBuff[8] = '3';
+					uartTXBuff[2] = ',';
+					uartTXBuff[3] = '1';
+					uartTXBuff[4] = '8';
+					uartTXBuff[5] = '3';
+					uartTXBuff[6] = '2';
+					uartTXBuff[7] = '1';
+					uartTXBuff[8] = '9';
 					uartTXBuff[9] = '3';
-					uartTXBuff[10] = buffer[2];
-					uartTXBuff[11] = buffer[3];
+					uartTXBuff[10] = '3';
+					uartTXBuff[11] = buffer[2];
+					uartTXBuff[12] = buffer[3];
 
-					HAL_UART_Transmit(&huart1, uartTXBuff, (position + 8), 100);
+					HAL_UART_Transmit(&huart1, uartTXBuff, (position +1 + 8), 10);
 					break;
 				case 'F':
 					uartTXBuff[0] = buffer[0];
@@ -142,10 +144,37 @@ int main(void)
 					uartTXBuff[2] = '\n';
 					uartTXBuff[3] = '\r';
 
-					HAL_UART_Transmit(&huart1, uartTXBuff, position-4, 100);
+					getTemp[0] = buffer[3];
+					getTemp[1] = buffer[4];
+					if (buffer[5] != '\n')
+					{
+						getTemp[2] = buffer[5];
+						position -=1;
+					}
+
+					HAL_UART_Transmit(&huart1, uartTXBuff, position-4, 10);
 					break;
 				case 'G':
+										uartTXBuff[0] = buffer[0];
+					uartTXBuff[1] = buffer[1];
+					uartTXBuff[2] = ',';
+					uartTXBuff[3] = getTemp[0];
+					uartTXBuff[4] = getTemp[1];
+					if (getTemp[2] != '\n')
+					{
+						uartTXBuff[5] = getTemp[2];
+						uartTXBuff[6] = '\n';
+						uartTXBuff[7] = '\r';
+						position = 9;
+					}
+					else
+					{
+						uartTXBuff[5] = '\n';
+						uartTXBuff[6] = '\r';
+						position = 8;
+					}
 
+					HAL_UART_Transmit(&huart1, uartTXBuff, position-2, 10);
 					break;
 				}
 				//position = 0;
