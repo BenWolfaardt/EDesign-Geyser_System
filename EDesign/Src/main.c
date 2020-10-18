@@ -52,9 +52,10 @@ UART_HandleTypeDef huart1;
 volatile uint8_t uartRXFlag = 0U;
 uint8_t uartRXBuff[40];
 uint8_t uartTXBuff[40];
-uint8_t position;
 uint8_t getTemp[3];
 uint8_t buffer[40];
+uint8_t position;
+uint8_t tempL = 0U;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void clearBuff(uint8_t *buffer);
 /* Private function prototypes -----------------------------------------------*/
 
 /* USER CODE END PFP */
@@ -110,14 +112,14 @@ int main(void)
 		{
 			uartRXFlag = 0U;
 
-			if (uartRXBuff[0] == '$')
+			if(uartRXBuff[0] == '$')
 				position = 0;
 
 			buffer[position] = uartRXBuff[0];
 			position ++;
 			HAL_UART_Receive_IT(&huart1, uartRXBuff, 1);
 
-			if (buffer[0] == '$' && buffer[position-2] == '\r' && buffer[position-1] == '\n')
+			if(buffer[0] == '$' && buffer[position-2] == '\r' && buffer[position-1] == '\n')
 			{
 				switch(buffer[1])
 				{
@@ -136,48 +138,73 @@ int main(void)
 					uartTXBuff[11] = buffer[2];
 					uartTXBuff[12] = buffer[3];
 
-					HAL_UART_Transmit(&huart1, uartTXBuff, (position +1 + 8), 10);
+					HAL_UART_Transmit_IT(&huart1, uartTXBuff, (position +1 + 8));
 					break;
 				case 'F':
 					uartTXBuff[0] = buffer[0];
 					uartTXBuff[1] = buffer[1];
-					uartTXBuff[2] = '\n';
-					uartTXBuff[3] = '\r';
+					uartTXBuff[2] = buffer[position-2];
+					uartTXBuff[3] = buffer[position-1];
 
-					getTemp[0] = buffer[3];
-					getTemp[1] = buffer[4];
-					if (buffer[5] != '\n')
+					if(position == 6)
 					{
+						getTemp[0] = buffer[3];
+						tempL = 1;
+					}
+					else if(position == 7)
+					{
+						getTemp[0] = buffer[3];
+						getTemp[1] = buffer[4];
+						tempL = 2;
+					}
+					else if (position == 8)
+					{
+						getTemp[0] = buffer[3];
+						getTemp[1] = buffer[4];
 						getTemp[2] = buffer[5];
-						position -=1;
+						tempL = 3;
 					}
 
-					HAL_UART_Transmit(&huart1, uartTXBuff, position-4, 10);
+					HAL_UART_Transmit_IT(&huart1, uartTXBuff, position-2);
 					break;
+
 				case 'G':
-										uartTXBuff[0] = buffer[0];
+					uartTXBuff[0] = buffer[0];
 					uartTXBuff[1] = buffer[1];
 					uartTXBuff[2] = ',';
-					uartTXBuff[3] = getTemp[0];
-					uartTXBuff[4] = getTemp[1];
-					if (getTemp[2] != '\n')
+
+					if(tempL == 1)
 					{
-						uartTXBuff[5] = getTemp[2];
-						uartTXBuff[6] = '\n';
-						uartTXBuff[7] = '\r';
-						position = 9;
-					}
-					else
-					{
+						uartTXBuff[3] = getTemp[0];
+						uartTXBuff[4] = '\r';
 						uartTXBuff[5] = '\n';
+
+						position = 6;
+					}
+					else if(tempL == 2)
+					{
+						uartTXBuff[3] = getTemp[0];
+						uartTXBuff[4] = getTemp[1];
+						uartTXBuff[5] = '\r';
+						uartTXBuff[6] = '\n';
+
+						position = 7;
+					}
+					else if(tempL == 3)
+					{
+						uartTXBuff[3] = getTemp[0];
+						uartTXBuff[4] = getTemp[1];
+						uartTXBuff[5] = getTemp[2];
 						uartTXBuff[6] = '\r';
+						uartTXBuff[7] = '\n';
+
 						position = 8;
 					}
 
-					HAL_UART_Transmit(&huart1, uartTXBuff, position-2, 10);
+					HAL_UART_Transmit_IT(&huart1, uartTXBuff, position);
 					break;
 				}
-				//position = 0;
+				clearBuff(buffer);
 			}
 		}
 		/* USER CODE END WHILE */
@@ -277,6 +304,14 @@ static void MX_GPIO_Init(void)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	uartRXFlag  = 1U;
+}
+
+void clearBuff(uint8_t *buffer)
+{
+	int i = 0;
+	for(i=0;i<40;i++)
+		buffer[i] = 0;
+
 }
 /* USER CODE END 4 */
 
