@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=F:/EDesign/V1.0/EDesign/Inc
+HeaderPath=E:/EDesign/V2.0/EDesign/Inc
 HeaderFiles=stm32f3xx_it.h;stm32f3xx_hal_conf.h;main.h;
-SourcePath=F:/EDesign/V1.0/EDesign/Src
+SourcePath=E:/EDesign/V2.0/EDesign/Src
 SourceFiles=stm32f3xx_it.h;stm32f3xx_hal_conf.h;main.h;stm32f3xx_it.c;stm32f3xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
