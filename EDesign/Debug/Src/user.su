@@ -1,7 +1,9 @@
-user.c:27:6:UserInitialise	8	static
-user.c:108:6:HAL_UART_RxCpltCallback	0	static
-user.c:115:9:String2Int	8	static
-user.c:145:9:Int2String	12	static
-user.c:56:6:DecodeCmd	8	static
-user.c:35:6:User	8	static
-user.c:189:6:resetAll	8	static
+user.c:32:6:UserInitialise	16	static
+user.c:129:9:String2Int	8	static
+user.c:159:9:Int2String	12	static
+user.c:203:6:resetAll	8	static
+user.c:90:6:DecodeCmd	8	static
+user.c:214:6:writeToPins	24	static
+user.c:62:6:User	8	static
+user.c:249:6:HAL_UART_RxCpltCallback	0	static
+user.c:256:6:HAL_SYSTICK_Callback	0	static

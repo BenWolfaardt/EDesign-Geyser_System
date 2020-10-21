@@ -24,6 +24,7 @@ void DecodeCmd(void);
 void UserInitialise(void);
 void User(void);
 void resetAll(void);
+void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL);
 
 uint8_t Int2String(char* outputString, int16_t value, uint8_t maxL);
 uint8_t String2Int(char* inputString, int16_t* outputInt);
