@@ -33,10 +33,10 @@
   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
-  * Parts of code taken from Lecturers code on SunLearn from first demo
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include "main.h"
 #include "stm32f3xx_hal.h"
 
 /* USER CODE BEGIN Includes */
@@ -45,10 +45,16 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+
 UART_HandleTypeDef huart1;
+
+
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+ADC_ChannelConfTypeDef adcChannel12;
+ADC_ChannelConfTypeDef adcChannel13;
 
 /* USER CODE END PV */
 
@@ -56,6 +62,7 @@ UART_HandleTypeDef huart1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +99,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_ADC1_Init();
 
   /* USER CODE BEGIN 2 */
   UserInitialise();
@@ -148,8 +156,9 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_ADC12;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
+  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -165,6 +174,63 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+/* ADC1 init function */
+static void MX_ADC1_Init(void)
+{
+
+  ADC_MultiModeTypeDef multimode;
+  //ADC_ChannelConfTypeDef sConfig;
+
+    /**Common config 
+    */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure the ADC multi-mode 
+    */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure Regular Channel 
+    */
+  adcChannel12.Channel = ADC_CHANNEL_12;
+  adcChannel12.Rank = 1;
+  adcChannel12.SingleDiff = ADC_SINGLE_ENDED;
+  adcChannel12.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  adcChannel12.OffsetNumber = ADC_OFFSET_NONE;
+  adcChannel12.Offset = 0;
+//  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
+  adcChannel13.Channel = ADC_CHANNEL_13;
+  adcChannel13.Rank = 1;
+  adcChannel13.SingleDiff = ADC_SINGLE_ENDED;
+  adcChannel13.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  adcChannel13.OffsetNumber = ADC_OFFSET_NONE;
+  adcChannel13.Offset = 0;
+
 }
 
 /* USART1 init function */
