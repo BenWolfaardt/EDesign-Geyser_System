@@ -41,9 +41,9 @@ uint32_t adcBuf12;
 uint32_t adcBuf13;
 uint32_t measuredRMS12;
 uint32_t iRMS12;
-uint32_t vRMS12;
+//uint32_t vRMS12;
 uint32_t measuredRMS13;
-uint32_t iRMS13;
+//uint32_t iRMS13;
 uint32_t vRMS13;
 
 volatile bool uartRxFlag;	// use 'volatile' keyword because the variable is changed from interrupt handler
@@ -146,13 +146,9 @@ void DecodeCmd()
 		break;
 
 	case 'K':
-			//display IRMS
+		//display IRMS
 
-//		vRMS12 = measuredRMS12*79.18793901;
-//
-//		measuredRMS13 = 3.3/((4096-1)*sqrt(20))*adcBuf13;
-//		iRMS13 = measuredRMS13*4.679287305;
-//		vRMS13 = measuredRMS13*79.18793901;
+		HAL_UART_Transmit(&huart1, (uint8_t*)iRMS12, 10, 1000);
 
 		break;
 	}
@@ -245,31 +241,14 @@ void resetAll(void)
 
 void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
 {
-	//nt i = 0;
-
-	//while (i <= segmentsL)
-	//{
-		//HAL_Delay(1);
-		//		if (displayDelay2ms == 1)
-		//		{
-		//			displayDelay2ms = 0;
-
-		//Use 1ms flag as HAL delay adjust timing of board and makes it either quicker or slower on eachcycle
-
-
-
-		//if (displayDelay2ms == 1)
-		//{
-			//displayDelay2ms = 0;
-
-			if(in == segmentsL)
-			{
-				in = 0;
-			}
-			else
-			{
-				in++;
-			}
+	if(in == segmentsL)
+	{
+		in = 0;
+	}
+	else
+	{
+		in++;
+	}
 
 	switch(in)
 	{
@@ -308,25 +287,15 @@ void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
 	break;
 	}
 
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,(~(segements[i] >> 0) & 0b00000001)); //1
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,(~(segements[i] >> 1) & 0b00000001)); //2
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,(~(segements[i] >> 2) & 0b00000001)); //3
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,(~(segements[i] >> 3) & 0b00000001)); //4
-//
 	i = (int)(in - 1);
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, (~(pins[i] >> 0) & 0b00000001)); //a
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6, (~(pins[i] >> 1) & 0b00000001)); //b
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7, (~(pins[i] >> 2) & 0b00000001)); //c
-			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6, (~(pins[i] >> 3) & 0b00000001)); //d
-			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_7, (~(pins[i] >> 4) & 0b00000001)); //e
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8, (~(pins[i] >> 5) & 0b00000001)); //f
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9, (~(pins[i] >> 6) & 0b00000001)); //g
-		//}
-		//i++;
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, (~(pins[i] >> 0) & 0b00000001)); //a
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6, (~(pins[i] >> 1) & 0b00000001)); //b
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7, (~(pins[i] >> 2) & 0b00000001)); //c
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6, (~(pins[i] >> 3) & 0b00000001)); //d
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_7, (~(pins[i] >> 4) & 0b00000001)); //e
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8, (~(pins[i] >> 5) & 0b00000001)); //f
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9, (~(pins[i] >> 6) & 0b00000001)); //g
 
-		//if(i == segmentsL)
-		//	i = 0;
-	//}
 }
 
 //----------------------------------------------------------------------------------------------//
@@ -345,7 +314,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 void HAL_SYSTICK_Callback(void)
 {
 	systickFlag = true;
-	uint32_t temp;
+	uint32_t temp12;
+	uint32_t temp13;
 	j++;
 	if (j == 1)
 	{
@@ -353,44 +323,60 @@ void HAL_SYSTICK_Callback(void)
 		displayDelay2ms = 1;
 	}
 
-		if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel12) != HAL_OK)
-		{
-			_Error_Handler(__FILE__, __LINE__);
-		}
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1,1000);
-		HAL_ADC_Stop(&hadc1);
-		adc12 = HAL_ADC_GetValue(&hadc1);
+	if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel12) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1,1000);
+	HAL_ADC_Stop(&hadc1);
+	adc12 = HAL_ADC_GetValue(&hadc1);
 
 
-		if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel13) != HAL_OK)
-		{
-			_Error_Handler(__FILE__, __LINE__);
-		}
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1,1000);
-		HAL_ADC_Stop(&hadc1);
-		adc13 = HAL_ADC_GetValue(&hadc1);
+	if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel13) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1,1000);
+	HAL_ADC_Stop(&hadc1);
+	adc13 = HAL_ADC_GetValue(&hadc1);
+
+
+	if (my_counter == 20)
+	{
+		adc12 *= adc12;
+		adcBuf12 += adc12;
+		temp12 = adcBuf12;
+		temp12/=20;
+		temp12 = sqrt(temp12);
+		temp12*=3350;
+		temp12/=4095;
+		measuredRMS12 = temp12;
+		iRMS12 = measuredRMS12*4.679287305;
+		adcBuf12 = 0;
+
+		adc13 *= adc13;
+		adcBuf13 += adc13;
+		temp13 = adcBuf13;
+		temp13/=20;
+		temp13 = sqrt(temp13);
+		temp13*=3300;
+		temp13/=4095;
+		measuredRMS13 = temp13;
+		vRMS13 = measuredRMS13*79.18793901;
+		adcBuf13 = 0;
+
+		my_counter = 0;
+	}
+	else
+	{
+		adc12 *= adc12;
+		adcBuf12 += adc12;
+
 		adc13 *= adc13;
 		adcBuf13 += adc13;
 
-		if (my_counter == 20)
-		{
-			adc12 *= adc12;
-			adcBuf12 += adc12;
-			temp = adcBuf12;
-			temp/=20;
-			temp = sqrt(temp);
-			temp*=3400;
-			temp/=4095;
-			measuredRMS12 = temp;
-			iRMS12 = measuredRMS12*4.679287305;
-			my_counter = 0;
-		}
-		else
-		{
-			adc12 *= adc12;
-			adcBuf12 += adc12;
-			my_counter++;
-		}
+		my_counter++;
+	}
 }
