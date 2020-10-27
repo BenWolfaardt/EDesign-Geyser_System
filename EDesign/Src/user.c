@@ -20,18 +20,25 @@ char uartRxChar;			// temporary storage
 char txBuf[maxTxL]; 		// buffer for replies that are to be sent out on UART
 char* txStudentNo = "$A,18321933\r\n";
 
+char tempF[3];
+
 extern ADC_ChannelConfTypeDef adcChannel12;
 extern ADC_ChannelConfTypeDef adcChannel13;
+
+extern TIM_HandleTypeDef htim2;
+
 extern ADC_HandleTypeDef hadc1;
 
 int i = 0;
 int j = 0;
+int k = 0;
 uint8_t my_counter;
 int16_t tempSetpoint;		// the current temperature set point
 
 uint8_t numberMap[10];
 uint8_t pinsValue[4];
 uint8_t segements[4];
+uint8_t pinsTemp[3];
 
 uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currently writing to
 
@@ -40,16 +47,39 @@ uint32_t adc13;
 uint32_t adcBuf12;
 uint32_t adcBuf13;
 uint32_t measuredRMS12;
-uint32_t iRMS12;
+uint32_t vRMS12;
 //uint32_t vRMS12;
 uint32_t measuredRMS13;
 //uint32_t iRMS13;
-uint32_t vRMS13;
+uint32_t iRMS13;
 
 volatile bool uartRxFlag;	// use 'volatile' keyword because the variable is changed from interrupt handler
-volatile bool systickFlag;
 
 
+//volatile bool adctick;
+
+//---------------------Prof code--------------------------//
+void LedSet(uint16_t val);
+
+volatile bool adcFlag;
+uint8_t adcchan;
+uint8_t samplectr;
+#define RMS_WINDOW 40
+float vrms_accum;
+float irms_accum;
+uint16_t isample[RMS_WINDOW];
+uint16_t vsample[RMS_WINDOW];
+uint32_t vrms_avg;
+uint32_t irms_avg;
+uint32_t vrms;
+uint32_t irms;
+
+uint32_t lasttick;
+
+uint8_t digit;
+//---------------------Prof code--------------------------//
+
+uint8_t g_length = 0;
 
 uint8_t in = 0;
 
@@ -58,8 +88,17 @@ uint8_t in = 0;
 void UserInitialise(void)
 {
 	uartRxFlag = false;
-	systickFlag = false;
 	tempSetpoint = 60;		// initial value
+
+	//---------------------Prof code--------------------------//
+	adcFlag = false;
+	adcchan = 0;
+	samplectr = 0;
+	irms_accum = 0;
+	vrms_accum = 0;
+
+	digit = 0;
+	//---------------------Prof code--------------------------//
 
 	numberMap[0] = 0b00111111;
 	numberMap[1] = 0b00000110;
@@ -83,6 +122,11 @@ void UserInitialise(void)
 	pinsValue[3] = numberMap[2];
 
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)&uartRxChar, 1);	// UART interrupt after 1 character was received
+
+
+	// start timer 2 for ADC sampling
+	__HAL_TIM_ENABLE(&htim2);
+	__HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
 }
 
 void User(void)
@@ -105,16 +149,113 @@ void User(void)
 		uartRxFlag = false;  // clear the flag - the 'receive character' event has been handled.
 		HAL_UART_Receive_IT(&huart1, (uint8_t*)&uartRxChar, 1);	// UART interrupt after 1 character was received
 	}
-	if(systickFlag == 1U)
+	if(adcFlag == 1U)
 	{
-		systickFlag = 0U;
+		// this code branch will execute every 250ns...
+		// the adcFlag variable will get set in the 250ns timer interrupt handler.
+		//
+		// use this branch to sample one ADC value.
+		// 1. use HAL_ADC_GetValue() to retrieve the last sampled ADC value.
+		// 2. process the value as needed
+		// 3. change the ADC channel
+		// 4. start a new ADC sampling iteration
+		//
+		// the result is that all ADC 4 channels are sampled every 1ms
 
-		writeToPins(segements, pinsValue, 3);
+		if (adcchan == 0)
+		{
+			vsample[samplectr] = HAL_ADC_GetValue(&hadc1);
+		}
+		else if (adcchan == 1)
+		{
+			isample[samplectr] = HAL_ADC_GetValue(&hadc1);
+		}
+		//else if (adcchan == 2)
+		//temperature_ambient += HAL_ADC_GetValue(&hadc1);
+		//else if (adcchan == 3)
+		//temperature_water += HAL_ADC_GetValue(&hadc1);
+
+		adcchan++;
+		//if (adcchan >= 4)
+		if (adcchan >= 2)
+		{
+			adcchan = 0;
+			samplectr++;
+
+			if (samplectr >= RMS_WINDOW)
+			{
+				/*				vsample *= vsample;
+				temp12 += vsample;
+				temp12/=RMS_WINDOW;
+				temp12 = sqrt(temp12);
+				temp12*=3350;
+				temp12/=4095;
+				measuredRMS12 = temp12;
+				//vRMS12 = measuredRMS12*4.679287305;
+				vrms = measuredRMS12*4.679287305;
+				adcBuf12 = 0;
+
+				//iRMS13 = measuredRMS12*84.97807018;
+				irms = measuredRMS12*84.97807018;
+				adcBuf13 = 0;*/
+				samplectr = 0;
+				/*				//float vrms_accum;
+				//float irms_accum;
+				//uint16_t isample[RMS_WINDOW];
+				//uint16_t vsample[RMS_WINDOW];
+				//uint32_t vrms_avg;
+				//uint32_t irms_avg;
+				//uint32_t vrms;
+				//uint32_t irms;
+			}
+			else
+			{
+				vsample *= vsample;
+				temp12 += adc12;*/
+			}
+		}
+
+		ADC_ChannelConfTypeDef chdef;
+		switch (adcchan)
+		{
+		case 0: chdef.Channel = ADC_CHANNEL_12; break;  //V
+		case 1: chdef.Channel = ADC_CHANNEL_13; break;  //I
+		//case 2: chdef.Channel = ADC_CHANNEL_11; break; //temp ambient
+		//case 3: chdef.Channel = ADC_CHANNEL_12; break; //temp water
+		}
+
+		chdef.Rank = 1;
+		chdef.SingleDiff = ADC_SINGLE_ENDED;
+		chdef.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+		chdef.OffsetNumber = ADC_OFFSET_NONE;
+		chdef.Offset = 0;
+		HAL_ADC_ConfigChannel(&hadc1, &chdef);
+
+		HAL_ADC_Start(&hadc1);
+
+		adcFlag = 0;
+
+
+		//writeToPins(segements, pinsValue, 3);
+	}
+
+	// 1ms timer
+	uint32_t tick = HAL_GetTick();
+	if (tick != lasttick)
+	{
+		lasttick = tick;
+
+		//LedUpdate();
+		writeToPins(segements, pinsValue, g_length);
 	}
 }
 
 void DecodeCmd()
-{	//uint32_t temp;
+{
+	//---------------------Prof code--------------------------//
+	uint8_t numcharswritten;
+	//---------------------Prof code--------------------------//
+
 	uint8_t charsL;
 
 	switch (cmdBuf[1])
@@ -126,29 +267,65 @@ void DecodeCmd()
 	case 'F':
 		String2Int(cmdBuf+3, &tempSetpoint);
 
-		txBuf[0] = '$';
-		txBuf[1] = 'F';
-		txBuf[2] = '\r';
-		txBuf[3] = '\n';
-
+		txBuf[0] = '$'; txBuf[1] = 'F';	txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+
+		//LedSet(tempSetpoint);
+
+		charsL = Int2String(tempF, tempSetpoint, 4);
+
+		while (k < charsL)
+		{
+			for (i=0; i <10; i++)
+			{
+				if (tempF[k] == (i+0x30))
+				{
+					pinsValue[k] = numberMap[i];
+					i = 10;
+				}
+			}
+			k++;
+		}
+		k = 0;
+
+		g_length = charsL;
+
 		break;
 
 	case 'G':
-		txBuf[0] = '$';
-		txBuf[1] = 'G';
-		txBuf[2] = ',';
+		txBuf[0] = '$';	txBuf[1] = 'G';	txBuf[2] = ',';
 		charsL = Int2String(txBuf+3, tempSetpoint, 4);
-		txBuf[3 + charsL] = '\r';
-		txBuf[4 + charsL] = '\n';
-
+		txBuf[3 + charsL] = '\r'; txBuf[4 + charsL] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL+5, 1000);
 		break;
 
 	case 'K':
-		//display IRMS
+		// return string with format $K,1234,220000,25,66,567800,OFF,OPEN<CR><LF>
+		txBuf[0] = '$'; txBuf[1] = 'K'; txBuf[2] = ',';
+		numcharswritten = 3;
+		numcharswritten += Int2String(txBuf+numcharswritten, irms, 10);
+		txBuf[numcharswritten] = ','; numcharswritten++;
+		numcharswritten += Int2String(txBuf+numcharswritten, vrms, 10);
+		txBuf[numcharswritten] = ','; numcharswritten++;
+		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // temp ambient
+		txBuf[numcharswritten] = ','; numcharswritten++;
+		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // temp water
+		txBuf[numcharswritten] = ','; numcharswritten++;
+		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // flow
+		txBuf[numcharswritten] = ','; numcharswritten++;
 
-		HAL_UART_Transmit(&huart1, (uint8_t*)iRMS12, 10, 1000);
+		txBuf[numcharswritten] = 'O'; numcharswritten++;
+		txBuf[numcharswritten] = 'F'; numcharswritten++;
+		txBuf[numcharswritten] = 'F'; numcharswritten++;
+		txBuf[numcharswritten] = ','; numcharswritten++;
+
+		txBuf[numcharswritten] = 'O'; numcharswritten++;
+		txBuf[numcharswritten] = 'P'; numcharswritten++;
+		txBuf[numcharswritten] = 'E'; numcharswritten++;
+		txBuf[numcharswritten] = 'N'; numcharswritten++;
+
+		txBuf[numcharswritten] = '\r'; numcharswritten++; txBuf[numcharswritten] = '\n'; numcharswritten++;
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, numcharswritten, 1000);
 
 		break;
 	}
@@ -184,7 +361,7 @@ uint8_t String2Int(char* inputString, int16_t* outputInt)
 }
 
 // convert integer var to ASCII string
-uint8_t Int2String(char* outputString, int16_t value, uint8_t maxL)
+uint8_t Int2String(char* outputString, int32_t value, uint8_t maxL)
 {
 	int numWritten = 0;
 	int writePosition = 0;
@@ -241,6 +418,7 @@ void resetAll(void)
 
 void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
 {
+
 	if(in == segmentsL)
 	{
 		in = 0;
@@ -311,72 +489,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 	uartRxFlag = true;
 }
 
-void HAL_SYSTICK_Callback(void)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	systickFlag = true;
-	uint32_t temp12;
-	uint32_t temp13;
-	j++;
-	if (j == 1)
-	{
-		j = 0;
-		displayDelay2ms = 1;
-	}
-
-	if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel12) != HAL_OK)
-	{
-		_Error_Handler(__FILE__, __LINE__);
-	}
-	HAL_ADC_Start(&hadc1);
-	HAL_ADC_PollForConversion(&hadc1,1000);
-	HAL_ADC_Stop(&hadc1);
-	adc12 = HAL_ADC_GetValue(&hadc1);
-
-
-	if (HAL_ADC_ConfigChannel(&hadc1, &adcChannel13) != HAL_OK)
-	{
-		_Error_Handler(__FILE__, __LINE__);
-	}
-	HAL_ADC_Start(&hadc1);
-	HAL_ADC_PollForConversion(&hadc1,1000);
-	HAL_ADC_Stop(&hadc1);
-	adc13 = HAL_ADC_GetValue(&hadc1);
-
-
-	if (my_counter == 20)
-	{
-		adc12 *= adc12;
-		adcBuf12 += adc12;
-		temp12 = adcBuf12;
-		temp12/=20;
-		temp12 = sqrt(temp12);
-		temp12*=3350;
-		temp12/=4095;
-		measuredRMS12 = temp12;
-		iRMS12 = measuredRMS12*4.679287305;
-		adcBuf12 = 0;
-
-		adc13 *= adc13;
-		adcBuf13 += adc13;
-		temp13 = adcBuf13;
-		temp13/=20;
-		temp13 = sqrt(temp13);
-		temp13*=3300;
-		temp13/=4095;
-		measuredRMS13 = temp13;
-		vRMS13 = measuredRMS13*79.18793901;
-		adcBuf13 = 0;
-
-		my_counter = 0;
-	}
-	else
-	{
-		adc12 *= adc12;
-		adcBuf12 += adc12;
-
-		adc13 *= adc13;
-		adcBuf13 += adc13;
-
-		my_counter++;
-	}
+	if (htim == &htim2)
+		adcFlag = true;
 }
+
+/*void LedSet(uint16_t val)
+{
+	//uint8_t charsL;
+
+
+}*/

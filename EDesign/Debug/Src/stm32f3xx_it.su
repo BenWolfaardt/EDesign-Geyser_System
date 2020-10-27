@@ -1,2 +1,2 @@
 stm32f3xx_it.c:52:6:SysTick_Handler	8	static
-stm32f3xx_it.c:74:6:USART1_IRQHandler	8	static
+stm32f3xx_it.c:74:6:USART1_IRQHandler	0	static
