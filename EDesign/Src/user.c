@@ -77,6 +77,9 @@ uint32_t irms;
 uint32_t lasttick;
 
 uint8_t digit;
+
+uint32_t ambientT;
+uint32_t waterT;
 //---------------------Prof code--------------------------//
 
 uint8_t g_length = 0;
@@ -170,14 +173,17 @@ void User(void)
 		{
 			isample[samplectr] = HAL_ADC_GetValue(&hadc1);
 		}
-		//else if (adcchan == 2)
-		//temperature_ambient += HAL_ADC_GetValue(&hadc1);
-		//else if (adcchan == 3)
-		//temperature_water += HAL_ADC_GetValue(&hadc1);
+		else if (adcchan == 2)
+		{
+			ambientT = HAL_ADC_GetValue(&hadc1);
+		}
+		else if (adcchan == 3)
+		{
+			waterT = HAL_ADC_GetValue(&hadc1);
+		}
 
 		adcchan++;
-		//if (adcchan >= 4)
-		if (adcchan >= 2)
+		if (adcchan >= 4)
 		{
 			adcchan = 0;
 			samplectr++;
@@ -218,10 +224,10 @@ void User(void)
 		ADC_ChannelConfTypeDef chdef;
 		switch (adcchan)
 		{
-		case 0: chdef.Channel = ADC_CHANNEL_12; break;  //V
-		case 1: chdef.Channel = ADC_CHANNEL_13; break;  //I
-		//case 2: chdef.Channel = ADC_CHANNEL_11; break; //temp ambient
-		//case 3: chdef.Channel = ADC_CHANNEL_12; break; //temp water
+		case 0: chdef.Channel = ADC_CHANNEL_12; break;  //V				//PB1
+		case 1: chdef.Channel = ADC_CHANNEL_13; break;  //I				//PB13
+		case 2: chdef.Channel = ADC_CHANNEL_8; break; //temp ambient	//PC2
+		case 3: chdef.Channel = ADC_CHANNEL_9; break; //temp water		//PC3
 		}
 
 		chdef.Rank = 1;
@@ -234,9 +240,6 @@ void User(void)
 		HAL_ADC_Start(&hadc1);
 
 		adcFlag = 0;
-
-
-		//writeToPins(segements, pinsValue, 3);
 	}
 
 	// 1ms timer
@@ -250,10 +253,21 @@ void User(void)
 	}
 }
 
+uint32_t TempConv(uint32_t tempVal)
+{
+	uint32_t temp = 0;
+	uint32_t scale = 0;
+
+	temp = ((100*tempVal)>>7)+((100*tempVal)>>12);
+	scale = (temp-500)/10;
+
+	return scale;
+}
+
 void DecodeCmd()
 {
 	//---------------------Prof code--------------------------//
-	uint8_t numcharswritten;
+	//uint8_t numcharswritten;
 	//---------------------Prof code--------------------------//
 
 	uint8_t charsL;
@@ -302,30 +316,30 @@ void DecodeCmd()
 	case 'K':
 		// return string with format $K,1234,220000,25,66,567800,OFF,OPEN<CR><LF>
 		txBuf[0] = '$'; txBuf[1] = 'K'; txBuf[2] = ',';
-		numcharswritten = 3;
-		numcharswritten += Int2String(txBuf+numcharswritten, irms, 10);
-		txBuf[numcharswritten] = ','; numcharswritten++;
-		numcharswritten += Int2String(txBuf+numcharswritten, vrms, 10);
-		txBuf[numcharswritten] = ','; numcharswritten++;
-		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // temp ambient
-		txBuf[numcharswritten] = ','; numcharswritten++;
-		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // temp water
-		txBuf[numcharswritten] = ','; numcharswritten++;
-		numcharswritten += Int2String(txBuf+numcharswritten, 0, 10);    // flow
-		txBuf[numcharswritten] = ','; numcharswritten++;
+		charsL = 3;
+		charsL += Int2String(txBuf+charsL, irms, 10);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, vrms, 10);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, TempConv(ambientT), 10);    // temp ambient
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, TempConv(waterT), 10);    // temp water
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, 0, 10);    // flow
+		txBuf[charsL] = ','; charsL++;
 
-		txBuf[numcharswritten] = 'O'; numcharswritten++;
-		txBuf[numcharswritten] = 'F'; numcharswritten++;
-		txBuf[numcharswritten] = 'F'; numcharswritten++;
-		txBuf[numcharswritten] = ','; numcharswritten++;
+		txBuf[charsL] = 'O'; charsL++;
+		txBuf[charsL] = 'F'; charsL++;
+		txBuf[charsL] = 'F'; charsL++;
+		txBuf[charsL] = ','; charsL++;
 
-		txBuf[numcharswritten] = 'O'; numcharswritten++;
-		txBuf[numcharswritten] = 'P'; numcharswritten++;
-		txBuf[numcharswritten] = 'E'; numcharswritten++;
-		txBuf[numcharswritten] = 'N'; numcharswritten++;
+		txBuf[charsL] = 'O'; charsL++;
+		txBuf[charsL] = 'P'; charsL++;
+		txBuf[charsL] = 'E'; charsL++;
+		txBuf[charsL] = 'N'; charsL++;
 
-		txBuf[numcharswritten] = '\r'; numcharswritten++; txBuf[numcharswritten] = '\n'; numcharswritten++;
-		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, numcharswritten, 1000);
+		txBuf[charsL] = '\r'; charsL++; txBuf[charsL] = '\n'; charsL++;
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL, 1000);
 
 		break;
 	}

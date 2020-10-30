@@ -46,7 +46,9 @@
 /* Exported functions ------------------------------------------------------- */
 
 void SysTick_Handler(void);
+void TIM2_IRQHandler(void);
 void USART1_IRQHandler(void);
+void EXTI15_10_IRQHandler(void);
 
 #ifdef __cplusplus
 }
