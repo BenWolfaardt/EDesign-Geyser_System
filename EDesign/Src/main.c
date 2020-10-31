@@ -53,8 +53,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-ADC_ChannelConfTypeDef adcChannel12;
-ADC_ChannelConfTypeDef adcChannel13;
+//ADC_ChannelConfTypeDef adcChannel12;
+//ADC_ChannelConfTypeDef adcChannel13;
 
 /* USER CODE END PV */
 

@@ -22,8 +22,8 @@ char* txStudentNo = "$A,18321933\r\n";
 
 char tempF[3];
 
-extern ADC_ChannelConfTypeDef adcChannel12;
-extern ADC_ChannelConfTypeDef adcChannel13;
+//extern ADC_ChannelConfTypeDef adcChannel12;
+//extern ADC_ChannelConfTypeDef adcChannel13;
 
 extern TIM_HandleTypeDef htim2;
 
@@ -80,8 +80,15 @@ uint8_t digit;
 
 uint32_t ambientT;
 uint32_t waterT;
-//---------------------Prof code--------------------------//
-
+//---------------------Ben code--------------------------//
+volatile bool flowFlag;
+volatile bool ms5Flag;
+bool lastFlowFlag;
+volatile uint8_t ms5Counter;
+uint16_t flowCounter;
+uint32_t totalFlow;
+uint8_t flowPulse;
+//--------------------------------------------------------//
 uint8_t g_length = 0;
 
 uint8_t in = 0;
@@ -242,11 +249,36 @@ void User(void)
 		adcFlag = 0;
 	}
 
+	//flowFlag = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
+	if (flowFlag != lastFlowFlag)
+	{
+		ms5Counter = 0;
+		ms5Flag = 0;
+		flowPulse = 0;
+	}
+	else if (flowFlag == lastFlowFlag && ms5Flag == 1)
+	{
+		flowPulse++;
+		if (flowPulse == 1)
+		{
+			flowCounter++;
+			totalFlow = flowCounter*100;
+		}
+	}
+	lastFlowFlag = flowFlag;
+
 	// 1ms timer
 	uint32_t tick = HAL_GetTick();
 	if (tick != lasttick)
 	{
 		lasttick = tick;
+
+		ms5Counter++;
+		if (ms5Counter >= 5)
+		{
+			ms5Counter = 0;
+			ms5Flag = 1;
+		}
 
 		//LedUpdate();
 		writeToPins(segements, pinsValue, g_length);
@@ -325,7 +357,7 @@ void DecodeCmd()
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, TempConv(waterT), 10);    // temp water
 		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, 0, 10);    // flow
+		charsL += Int2String(txBuf+charsL, flowCounter*100, 10);    // flow totalFlow
 		txBuf[charsL] = ','; charsL++;
 
 		txBuf[charsL] = 'O'; charsL++;
@@ -503,10 +535,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 	uartRxFlag = true;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) //every 250 ns
 {
 	if (htim == &htim2)
 		adcFlag = true;
+
+	flowFlag = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
 }
 
 /*void LedSet(uint16_t val)
