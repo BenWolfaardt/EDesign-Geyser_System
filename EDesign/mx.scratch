@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>H:\EDesign\V3.2\EDesign\\EDesign</ProjectName>
+<ProjectName>E:\EDesign\V3.3\EDesign\\EDesign</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
-<HAL_Driver>C:\Users\Productivity\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.0\Drivers\CMSIS</HAL_Driver>
+<HAL_Driver>C:\STMRepo\STM32Cube_FW_F3_V1.9.0\Drivers\CMSIS</HAL_Driver>
 <Toolchain>TrueSTUDIO</Toolchain>
 <Version>0</Version>
 

@@ -85,9 +85,17 @@ volatile bool flowFlag;
 volatile bool ms5Flag;
 bool lastFlowFlag;
 volatile uint8_t ms5Counter;
-uint16_t flowCounter;
+uint32_t flowCounter;
 uint32_t totalFlow;
 uint8_t flowPulse;
+
+int16_t heaterState;
+int16_t valveState;
+
+bool flowValues[10000];
+
+volatile bool flowHighFlag;
+volatile bool firstHighFlag;
 //--------------------------------------------------------//
 uint8_t g_length = 0;
 
@@ -249,29 +257,35 @@ void User(void)
 		adcFlag = 0;
 	}
 
-	//flowFlag = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
-	if (flowFlag != lastFlowFlag)
+	if (flowHighFlag == 1)
 	{
-		ms5Counter = 0;
-		ms5Flag = 0;
-		flowPulse = 0;
-	}
-	else if (flowFlag == lastFlowFlag && ms5Flag == 1)
-	{
-		flowPulse++;
-		if (flowPulse == 1)
+		if (firstHighFlag == 1)
 		{
-			flowCounter++;
-			totalFlow = flowCounter*100;
+			firstHighFlag = 0;
+			ms5Counter = 0;
+			ms5Flag = 0;
+			flowPulse = 0;
+		}
+		if (ms5Flag == 1)
+		{
+			ms5Flag = 0;
+
+			flowPulse++;
+			if (flowPulse == 1)
+			{
+				flowCounter++;
+				totalFlow = 100*flowCounter;
+			}
 		}
 	}
-	lastFlowFlag = flowFlag;
 
 	// 1ms timer
 	uint32_t tick = HAL_GetTick();
 	if (tick != lasttick)
 	{
 		lasttick = tick;
+
+		flowFlag = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_10);
 
 		ms5Counter++;
 		if (ms5Counter >= 5)
@@ -296,6 +310,16 @@ uint32_t TempConv(uint32_t tempVal)
 	return scale;
 }
 
+void switchHeater(void)
+{
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,heaterState); ////-----------------------------------------------------------------------------------------------------------------check in k
+}
+
+void switchValve(void)
+{
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,valveState); ////-----------------------------------------------------------------------------------------------------------------set in K
+}
+
 void DecodeCmd()
 {
 	//---------------------Prof code--------------------------//
@@ -306,11 +330,33 @@ void DecodeCmd()
 
 	switch (cmdBuf[1])
 	{
-	case 'A' :
+	case 'A' : //Student number
+		flowCounter = 0;	//-----------------------------------------------------------------------------------------------------------------flow counter remove
 		HAL_UART_Transmit(&huart1, (uint8_t*)txStudentNo, 13, 1000);
 		break;
 
-	case 'F':
+	case 'B' : //Switch valve
+		String2Int(cmdBuf+3, &valveState);
+
+		switchValve();
+
+		txBuf[0] = '$';	txBuf[1] = 'B';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+		break;
+
+	case 'D' : //Switch heater
+		String2Int(cmdBuf+3, &heaterState);
+
+		switchHeater();
+
+		txBuf[0] = '$';	txBuf[1] = 'D';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+
+		break;
+
+	case 'F': //Set Temperature
 		String2Int(cmdBuf+3, &tempSetpoint);
 
 		txBuf[0] = '$'; txBuf[1] = 'F';	txBuf[2] = '\r'; txBuf[3] = '\n';
@@ -338,14 +384,14 @@ void DecodeCmd()
 
 		break;
 
-	case 'G':
+	case 'G': //Get temperature
 		txBuf[0] = '$';	txBuf[1] = 'G';	txBuf[2] = ',';
 		charsL = Int2String(txBuf+3, tempSetpoint, 4);
 		txBuf[3 + charsL] = '\r'; txBuf[4 + charsL] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL+5, 1000);
 		break;
 
-	case 'K':
+	case 'K': //Request telemetry
 		// return string with format $K,1234,220000,25,66,567800,OFF,OPEN<CR><LF>
 		txBuf[0] = '$'; txBuf[1] = 'K'; txBuf[2] = ',';
 		charsL = 3;
@@ -357,7 +403,7 @@ void DecodeCmd()
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, TempConv(waterT), 10);    // temp water
 		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, flowCounter*100, 10);    // flow totalFlow
+		charsL += Int2String(txBuf+charsL, totalFlow, 10);    // flow totalFlow
 		txBuf[charsL] = ','; charsL++;
 
 		txBuf[charsL] = 'O'; charsL++;
@@ -540,7 +586,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) //every 250 ns
 	if (htim == &htim2)
 		adcFlag = true;
 
-	flowFlag = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	flowHighFlag = 1;
+	firstHighFlag = 1;
 }
 
 /*void LedSet(uint16_t val)
