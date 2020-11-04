@@ -9,11 +9,12 @@
 
 #include "user.h"
 #include "math.h"
+#include "globals.h"
 
 #define cmdBufL 50   		// maximum length of a command string received on the UART
 #define maxTxL  50  		// maximum length of transmit buffer (replies sent back to UART)
 
-bool displayDelay2ms = 0;
+//bool displayDelay2ms = 0;
 
 char cmdBuf[cmdBufL];  		// buffer in which to store commands that are received from the UART
 char uartRxChar;			// temporary storage
@@ -29,20 +30,22 @@ extern TIM_HandleTypeDef htim2;
 
 extern ADC_HandleTypeDef hadc1;
 
+extern RTC_HandleTypeDef hrtc;
+
 int i = 0;
 int j = 0;
-int k = 0;
+
 uint8_t my_counter;
 int16_t tempSetpoint;		// the current temperature set point
 
 uint8_t numberMap[10];
 uint8_t pinsValue[4];
 uint8_t segements[4];
-uint8_t pinsTemp[3];
+//uint8_t pinsTemp[3];
 
 uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currently writing to
 
-uint32_t adc12;
+/*uint32_t adc12;
 uint32_t adc13;
 uint32_t adcBuf12;
 uint32_t adcBuf13;
@@ -51,7 +54,7 @@ uint32_t vRMS12;
 //uint32_t vRMS12;
 uint32_t measuredRMS13;
 //uint32_t iRMS13;
-uint32_t iRMS13;
+uint32_t iRMS13;*/
 
 volatile bool uartRxFlag;	// use 'volatile' keyword because the variable is changed from interrupt handler
 
@@ -81,9 +84,9 @@ uint8_t digit;
 uint32_t ambientT;
 uint32_t waterT;
 //---------------------Ben code--------------------------//
-volatile bool flowFlag;
+//volatile bool flowFlag;
 volatile bool ms5Flag;
-bool lastFlowFlag;
+//bool lastFlowFlag;
 volatile uint8_t ms5Counter;
 uint32_t flowCounter;
 uint32_t totalFlow;
@@ -92,11 +95,50 @@ uint8_t flowPulse;
 int16_t heaterState;
 int16_t valveState;
 
-bool flowValues[10000];
+//bool flowValues[10000];
 
 volatile bool flowHighFlag;
 volatile bool firstHighFlag;
-//--------------------------------------------------------//
+
+//--------------------Demo 4------------------------------------//
+
+int16_t scheduleState;
+int16_t heatingWindow;
+RTC_TimeTypeDef onTime[3];
+uint8_t HH_on;
+uint8_t mm_on;
+uint8_t ss_on;
+RTC_TimeTypeDef offTime[3];
+uint8_t HH_off;
+uint8_t mm_off;
+uint8_t ss_off;
+volatile uint8_t timeL;
+
+RTC_DateTypeDef setDate;
+uint8_t YYYY_set;
+uint8_t MM_set;
+uint8_t DD_set;
+RTC_TimeTypeDef setTime;
+uint8_t HH_set;
+uint8_t mm_set;
+uint8_t ss_set;
+RTC_DateTypeDef getDate;
+uint8_t YYYY_get;
+uint8_t MM_get;
+uint8_t DD_get;
+RTC_TimeTypeDef getTime;
+uint8_t HH_get;
+uint8_t mm_get;
+uint8_t ss_get;
+
+RTC_DateTypeDef getDateLive;
+RTC_TimeTypeDef getTimeLive;
+
+volatile HAL_StatusTypeDef halStatus;
+//--------------------Demo 4------------------------------------//
+
+
+
 uint8_t g_length = 0;
 
 uint8_t in = 0;
@@ -117,6 +159,10 @@ void UserInitialise(void)
 
 	digit = 0;
 	//---------------------Prof code--------------------------//
+
+	valveState = 0;
+	heaterState = 0;
+	scheduleState = 0;
 
 	numberMap[0] = 0b00111111;
 	numberMap[1] = 0b00000110;
@@ -285,7 +331,7 @@ void User(void)
 	{
 		lasttick = tick;
 
-		flowFlag = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_10);
+		//flowFlag = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
 
 		ms5Counter++;
 		if (ms5Counter >= 5)
@@ -296,6 +342,15 @@ void User(void)
 
 		//LedUpdate();
 		writeToPins(segements, pinsValue, g_length);
+	}
+
+	if (rtcSecFlag == 1) //------------1 second period
+	{
+		rtcSecFlag = 0;
+		tick = 0;
+
+		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
+		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
 	}
 }
 
@@ -312,12 +367,12 @@ uint32_t TempConv(uint32_t tempVal)
 
 void switchHeater(void)
 {
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,heaterState); ////-----------------------------------------------------------------------------------------------------------------check in k
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,heaterState);
 }
 
 void switchValve(void)
 {
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,valveState); ////-----------------------------------------------------------------------------------------------------------------set in K
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,valveState);
 }
 
 void DecodeCmd()
@@ -331,16 +386,24 @@ void DecodeCmd()
 	switch (cmdBuf[1])
 	{
 	case 'A' : //Student number
-		flowCounter = 0;	//-----------------------------------------------------------------------------------------------------------------flow counter remove
+		//flowCounter = 0;	//-----------------------------------------------------------------------------------------------------------------flow counter remove
 		HAL_UART_Transmit(&huart1, (uint8_t*)txStudentNo, 13, 1000);
 		break;
 
 	case 'B' : //Switch valve
 		String2Int(cmdBuf+3, &valveState);
 
-		switchValve();
+		switchValve();//----------------------------------------------------------default values
 
 		txBuf[0] = '$';	txBuf[1] = 'B';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+		break;
+
+	case 'C' : //Enable/ disable automatic schedule
+		String2Int(cmdBuf+3, &scheduleState);//----------------------------------------------------------default values OFF
+		//-----------------------------------------------------------------------------------------------------------------must i actualy code something?
+		txBuf[0] = '$';	txBuf[1] = 'C';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
 		break;
@@ -356,6 +419,14 @@ void DecodeCmd()
 
 		break;
 
+	case 'E' : //Enable/disable logging to flash memory
+		String2Int(cmdBuf+3, &valveState);
+		//-----------------------------------------------------------------------------------------------------------------must i actualy code something?
+		txBuf[0] = '$';	txBuf[1] = 'E';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+		break;
+
 	case 'F': //Set Temperature
 		String2Int(cmdBuf+3, &tempSetpoint);
 
@@ -366,29 +437,119 @@ void DecodeCmd()
 
 		charsL = Int2String(tempF, tempSetpoint, 4);
 
-		while (k < charsL)
+		while (i < charsL)
 		{
-			for (i=0; i <10; i++)
+			for (j=0; j <10; j++)
 			{
-				if (tempF[k] == (i+0x30))
+				if (tempF[i] == (j+0x30))
 				{
-					pinsValue[k] = numberMap[i];
-					i = 10;
+					pinsValue[i] = numberMap[j];
+					j = 10;
 				}
 			}
-			k++;
+			i++;
 		}
-		k = 0;
+		i = 0;
 
 		g_length = charsL;
 
 		break;
 
 	case 'G': //Get temperature
+
 		txBuf[0] = '$';	txBuf[1] = 'G';	txBuf[2] = ',';
 		charsL = Int2String(txBuf+3, tempSetpoint, 4);
 		txBuf[3 + charsL] = '\r'; txBuf[4 + charsL] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL+5, 1000);
+		break;
+
+	case 'H' : //Set time
+
+		timeL = 0;
+
+		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &HH_set);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &mm_set);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &ss_set);
+
+		setDate.Year = YYYY_set;
+		setDate.Month = MM_set;
+		setDate.Date = DD_set;
+		setTime.Hours = HH_set;
+		setTime.Minutes = mm_set;
+		setTime.Seconds = ss_set;
+
+		//Update the Calendar (cancel write protection and enter init mode)
+		__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc); // Disable write protection
+		halStatus = RTC_EnterInitMode(&hrtc); // Enter init mode
+		halStatus = HAL_RTC_SetTime(&hrtc, &setTime, RTC_FORMAT_BCD);
+		halStatus = HAL_RTC_SetDate(&hrtc, &setDate, RTC_FORMAT_BCD);
+		__HAL_RTC_WRITEPROTECTION_ENABLE(&hrtc);
+
+		txBuf[0] = '$';	txBuf[1] = 'H';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+		break;
+
+	case 'I' : //Get time
+
+//		halStatus = HAL_RTC_GetTime(&hrtc, &getTime, RTC_FORMAT_BCD);
+//		halStatus = HAL_RTC_GetDate(&hrtc, &getDate, RTC_FORMAT_BCD);
+
+		getTime = getTimeLive;
+		getDate = getDateLive;
+
+		txBuf[0] = '$';	txBuf[1] = 'I';
+		txBuf[2] = ',';
+		txBuf[3] = '2';
+		txBuf[4] = '0';
+		charsL = 5;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Hours, 2);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Minutes, 2);
+		txBuf[charsL] = ','; charsL++;
+		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Seconds, 2);
+		txBuf[charsL] = '\r'; charsL++; txBuf[charsL] = '\n'; charsL++;
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL, 1000);
+		break;
+
+	case 'J' : //Set heating schedule
+		//In order to set a heating schedule for the 2nd schedule window, to start at 8:30 AM and end at 10AM, the
+		//test station will issue a command
+		//$J,2,8,30,0,10,0,0<CR><LF>
+
+		String2Int(cmdBuf+3, &heatingWindow);
+
+		timeL = 0;
+
+		timeL = StringTime2Int(cmdBuf+5, &HH_on);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &mm_on);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &ss_on);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &HH_off);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &mm_off);
+		timeL = StringTime2Int(cmdBuf+5+timeL, &ss_off);
+
+		onTime[heatingWindow-1].Hours = HH_on;
+		onTime[heatingWindow-1].Minutes = mm_on;
+		onTime[heatingWindow-1].Seconds = ss_on;
+		HAL_RTC_SetTime(&hrtc, &onTime[heatingWindow-1], RTC_FORMAT_BCD);
+
+		offTime[heatingWindow-1].Hours = HH_off;
+		offTime[heatingWindow-1].Minutes = mm_off;
+		offTime[heatingWindow-1].Seconds = ss_off;
+		HAL_RTC_SetTime(&hrtc, &offTime[heatingWindow-1], RTC_FORMAT_BCD);
+
+		txBuf[0] = '$';	txBuf[1] = 'J';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
 		break;
 
 	case 'K': //Request telemetry
@@ -406,21 +567,74 @@ void DecodeCmd()
 		charsL += Int2String(txBuf+charsL, totalFlow, 10);    // flow totalFlow
 		txBuf[charsL] = ','; charsL++;
 
-		txBuf[charsL] = 'O'; charsL++;
-		txBuf[charsL] = 'F'; charsL++;
-		txBuf[charsL] = 'F'; charsL++;
-		txBuf[charsL] = ','; charsL++;
-
-		txBuf[charsL] = 'O'; charsL++;
-		txBuf[charsL] = 'P'; charsL++;
-		txBuf[charsL] = 'E'; charsL++;
-		txBuf[charsL] = 'N'; charsL++;
+		if (heaterState == 0U)
+		{
+			txBuf[charsL] = 'O'; charsL++;
+			txBuf[charsL] = 'F'; charsL++;
+			txBuf[charsL] = 'F'; charsL++;
+			txBuf[charsL] = ','; charsL++;
+		}
+		else if(heaterState==1U)
+		{
+			txBuf[charsL] = 'O'; charsL++;
+			txBuf[charsL] = 'N'; charsL++;
+			txBuf[charsL] = ','; charsL++;
+		}
+		if(valveState==0U)
+		{
+			txBuf[charsL] = 'C'; charsL++;
+			txBuf[charsL] = 'L'; charsL++;
+			txBuf[charsL] = 'O'; charsL++;
+			txBuf[charsL] = 'S'; charsL++;
+			txBuf[charsL] = 'E'; charsL++;
+			txBuf[charsL] = 'D'; charsL++;
+		}
+		else if(valveState==1U)
+		{
+			txBuf[charsL] = 'O'; charsL++;
+			txBuf[charsL] = 'P'; charsL++;
+			txBuf[charsL] = 'E'; charsL++;
+			txBuf[charsL] = 'N'; charsL++;
+		}
 
 		txBuf[charsL] = '\r'; charsL++; txBuf[charsL] = '\n'; charsL++;
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL, 1000);
 
 		break;
+
+	case 'L' : //Request log entry
+		String2Int(cmdBuf+3, &valveState);
+
+		switchValve();
+
+		txBuf[0] = '$';	txBuf[1] = 'B';
+		txBuf[2] = '\r'; txBuf[3] = '\n';
+		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
+		break;
 	}
+}
+
+uint8_t StringTime2Int(char* inputTimeString, uint8_t* outputTimeInt)
+{
+	int returnValue = 0;
+	timeL += 1;
+
+	if (*inputTimeString == ',')
+		return 0;
+
+	while ((*inputTimeString >= '0') && (*inputTimeString <= '9'))
+	{
+		returnValue *= 10;
+		returnValue += (*inputTimeString - 48);
+
+		if (returnValue >= 128)
+			return 0;
+
+		inputTimeString++;
+		timeL++;
+	}
+	*outputTimeInt = (int8_t)(returnValue);
+	return timeL;
 }
 
 uint8_t String2Int(char* inputString, int16_t* outputInt)
@@ -453,7 +667,7 @@ uint8_t String2Int(char* inputString, int16_t* outputInt)
 }
 
 // convert integer var to ASCII string
-uint8_t Int2String(char* outputString, int32_t value, uint8_t maxL)
+uint32_t Int2String(char* outputString, int32_t value, uint8_t maxL)
 {
 	int numWritten = 0;
 	int writePosition = 0;
@@ -479,8 +693,12 @@ uint8_t Int2String(char* outputString, int32_t value, uint8_t maxL)
 		digits = 3;
 	else if (value < 10000)
 		digits = 4;
-	else
+	else if (value < 100000)
 		digits = 5;
+	else if (value < 1000000)
+		digits = 6;
+	else
+		digits = 7;
 
 	if (digits > maxL)
 		return 0; // error - not enough space in output string!

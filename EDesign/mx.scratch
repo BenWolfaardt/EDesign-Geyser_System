@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>E:\EDesign\V3.3\EDesign\\EDesign</ProjectName>
+<ProjectName>F:\EDesign\V4.1\EDesign\\EDesign</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
 <HAL_Driver>C:\STMRepo\STM32Cube_FW_F3_V1.9.0\Drivers\CMSIS</HAL_Driver>
