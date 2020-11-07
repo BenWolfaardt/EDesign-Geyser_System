@@ -10,6 +10,9 @@
 
 #include "stdbool.h"
 
-bool rtcSecFlag;
+volatile bool rtcSecFlag;
+volatile bool i2cTxFlag;
+volatile bool i2cErFlag;
+
 
 #endif /* GLOBALS_H_ */

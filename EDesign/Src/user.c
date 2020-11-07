@@ -32,6 +32,8 @@ extern ADC_HandleTypeDef hadc1;
 
 extern RTC_HandleTypeDef hrtc;
 
+extern I2C_HandleTypeDef hi2c1;
+
 int i = 0;
 int j = 0;
 
@@ -135,6 +137,10 @@ RTC_DateTypeDef getDateLive;
 RTC_TimeTypeDef getTimeLive;
 
 volatile HAL_StatusTypeDef halStatus;
+
+uint8_t pData;
+
+uint8_t buffer[4];
 //--------------------Demo 4------------------------------------//
 
 
@@ -191,10 +197,15 @@ void UserInitialise(void)
 	// start timer 2 for ADC sampling
 	__HAL_TIM_ENABLE(&htim2);
 	__HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
+
+	HAL_I2C_Init(&hi2c1);
+
+	//HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[0], 1, 100);
 }
 
 void User(void)
 {
+	//halStatus = HAL_I2C_Master_Transmit_IT(&hi2c1, 0x44<<1, &pData, 1);	// I2C write call
 
 	if (uartRxFlag)
 	{
@@ -352,6 +363,80 @@ void User(void)
 		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
 		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
 	}
+
+//		buffer[0] = 0x00;
+
+
+	//halStatus = HAL_I2C_Master_Transmit_IT(&hi2c1, 0x45<<1, &buffer[0], 1);	// I2C write call
+
+
+//		HAL_I2C_Mem_Read(&hi2c1, 0x44>>1, 0x00, 2, &buffer[0], 4, 100);
+
+
+	//HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[0], 1, 100); //45 rotary slider
+	//HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[1], 3, 100);
+	//HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, buffer, 4, 100); //45 rotary slider
+	//HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[0], 1, 100);
+
+
+	if (i2cTxFlag)	//Now process the interrupt call-back
+	{
+		i2cTxFlag = 0;
+
+
+		//buffer[0] = 0x45>>1 | 0;//control byte
+		//ACK
+		//buffer[1] = 0; //MSB
+		//ACK
+		//buffer[2] = 0; //LSB
+
+		//HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[3], 1, 100);
+
+		//		//S - start
+		//		buffer[0] = ; //Control byte + WRITE bit --- Control byte 7 bit (slave) address then 1 bit read/ write
+		//		//ACK
+		//		buffer[1] = 0x28;//address command
+		//		//ACK
+		//		buffer[2] = 0; //MSB
+		//		//ACK
+		//		buffer[3] = 0; //LSB
+		//		//ACK
+		//		//S - stop
+		//
+		//		//RDY set LOW
+		//
+		//		HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, buffer, 4, 100); //45 rotary slider
+
+		//HAL_Delay(20);
+
+		//S - start
+		/*buffer[0] = 0x45>>1 | 0; //Control byte + WRITE bit------------------------ or 0 ----------------------
+		//ACK
+		buffer[1] = 0x03;//address command
+		//ACK
+		//S - Start
+		buffer[2] =  0x45>>1 | 1; //Control byte + READ bit
+		//ACK
+		buffer[3] = 0; //MSB
+		//NACK
+		//S - stop
+
+		//RDY set LOW
+
+		HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[0], 1, 100);
+		HAL_Delay(30);
+		HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[1], 1, 100);
+		HAL_Delay(30);
+		HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[2], 1, 100);
+		HAL_Delay(30);
+		HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[3], 1, 100);
+		HAL_Delay(30);*/
+
+		//float value = buffer[0]<<8 | buffer[1]; //combine 2 8-bit into 1 16-bit
+
+		//HAL_Delay(100);
+		//HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4);
+	}
 }
 
 uint32_t TempConv(uint32_t tempVal)
@@ -495,8 +580,8 @@ void DecodeCmd()
 
 	case 'I' : //Get time
 
-//		halStatus = HAL_RTC_GetTime(&hrtc, &getTime, RTC_FORMAT_BCD);
-//		halStatus = HAL_RTC_GetDate(&hrtc, &getDate, RTC_FORMAT_BCD);
+		//		halStatus = HAL_RTC_GetTime(&hrtc, &getTime, RTC_FORMAT_BCD);
+		//		halStatus = HAL_RTC_GetDate(&hrtc, &getDate, RTC_FORMAT_BCD);
 
 		getTime = getTimeLive;
 		getDate = getDateLive;
@@ -812,6 +897,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	firstHighFlag = 1;
 }
 
+void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	rtcSecFlag = 1;
+}
 /*void LedSet(uint16_t val)
 {
 	//uint8_t charsL;
