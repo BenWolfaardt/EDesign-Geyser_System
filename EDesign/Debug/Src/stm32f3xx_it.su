@@ -1,0 +1,7 @@
+stm32f3xx_it.c:55:6:SysTick_Handler	8	static
+stm32f3xx_it.c:77:6:RTC_WKUP_IRQHandler	8	static
+stm32f3xx_it.c:91:6:TIM2_IRQHandler	8	static
+stm32f3xx_it.c:105:6:I2C1_EV_IRQHandler	8	static
+stm32f3xx_it.c:119:6:I2C1_ER_IRQHandler	8	static
+stm32f3xx_it.c:133:6:USART1_IRQHandler	8	static
+stm32f3xx_it.c:147:6:EXTI15_10_IRQHandler	8	static

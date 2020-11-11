@@ -1,0 +1,4 @@
+interrupts.c:17:6:HAL_UART_RxCpltCallback	0	static
+interrupts.c:24:6:HAL_TIM_PeriodElapsedCallback	0	static
+interrupts.c:31:6:HAL_GPIO_EXTI_Callback	0	static
+interrupts.c:37:6:HAL_RTCEx_WakeUpTimerEventCallback	0	static

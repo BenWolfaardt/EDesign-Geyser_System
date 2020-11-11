@@ -1,0 +1,3 @@
+user.c:99:6:UserInitialise	8	static
+user.c:152:6:DecodeCmd	40	static
+user.c:391:6:Flags	40	static
