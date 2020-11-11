@@ -40,13 +40,14 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f3xx_hal.h"
+#include "main.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
 void SysTick_Handler(void);
-void RTC_WKUP_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void I2C1_EV_IRQHandler(void);
 void I2C1_ER_IRQHandler(void);
