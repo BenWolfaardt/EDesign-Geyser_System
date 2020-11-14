@@ -23,6 +23,8 @@ char* txStudentNo = "$A,18321933\r\n";
 uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currently writing to
 
 //-------------------------Nested Flags---------------------//
+volatile bool ms3Flag;
+volatile uint8_t ms3Counter;
 volatile bool ms5Flag;
 volatile uint8_t ms5Counter;
 
@@ -131,10 +133,12 @@ void UserInitialise(void)
 	segementsSet[2] = 0b0100;
 	segementsSet[3] = 0b1000;
 
-//	pinsValue[0] = numberMap[1];
-//	pinsValue[1] = numberMap[8];
-//	pinsValue[2] = numberMap[5];
-//	pinsValue[3] = numberMap[2];
+	pinsValue[0] = numberMap[1];
+	pinsValue[1] = numberMap[8];
+	pinsValue[2] = numberMap[5];
+	pinsValue[3] = numberMap[2];
+
+	segmentsL = 4;
 
 	HAL_UART_Receive_IT(&huart1, (uint8_t*)&uartRxChar, 1);	// UART interrupt after 1 character was received
 
@@ -208,6 +212,7 @@ void DecodeCmd()
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
 
 		//LedSet(tempSetpoint);
+		i = 0;
 
 		charsL = Int2String(tempF, tempSetpoint, 4);
 
@@ -528,6 +533,14 @@ void Flags(void)
 		lasttick = tick;
 
 		//flowFlag = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
+
+		ms3Counter++;
+		if (ms3Counter >= 1)
+		{
+			ms3Counter = 0;
+			ms3Flag = 1;
+			//writeToPins(segementsSet, pinsValue, segmentsL);
+		}
 
 		ms5Counter++;
 		if (ms5Counter >= 5)

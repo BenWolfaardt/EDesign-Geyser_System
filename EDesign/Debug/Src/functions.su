@@ -4,4 +4,4 @@ functions.c:27:6:switchValve	8	static
 functions.c:32:9:StringTime2Int	4	static
 functions.c:55:9:String2Int	8	static
 functions.c:85:10:Int2String	12	static
-functions.c:133:6:writeToPins	16	static
+functions.c:133:6:writeToPins	24	static

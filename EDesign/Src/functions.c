@@ -132,6 +132,49 @@ uint32_t Int2String(char* outputString, int32_t value, uint8_t maxL)
 
 void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
 {
+	static t =0;
+	i = 0;
+
+	while (i <= segmentsL)
+	{
+		//HAL_Delay(1);
+		//Use 1ms flag as HAL delay adjust timing of board and makes it either quicker or slower on eachcycle
+
+
+
+
+
+		if((HAL_GetTick()-t)>1){
+//
+//		if (ms3Flag == 1)
+//		{
+//			ms3Flag = 0;
+
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_10,(~(segments[i] >> 0) & 0b00000001)); //1
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,(~(segments[i] >> 1) & 0b00000001)); //2
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,(~(segments[i] >> 2) & 0b00000001)); //3
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,(~(segments[i] >> 3) & 0b00000001)); //4
+
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5, (~(pins[i] >> 0) & 0b00000001)); //a
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6, (~(pins[i] >> 1) & 0b00000001)); //b
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7, (~(pins[i] >> 2) & 0b00000001)); //c
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6, (~(pins[i] >> 3) & 0b00000001)); //d
+			HAL_GPIO_WritePin(GPIOC,GPIO_PIN_7, (~(pins[i] >> 4) & 0b00000001)); //e
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8, (~(pins[i] >> 5) & 0b00000001)); //f
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9, (~(pins[i] >> 6) & 0b00000001)); //g
+
+			i++;
+//		}
+			t = HAL_GetTick();
+		}
+//		if(i == 4)
+//			i = 0;
+	}
+
+}
+
+/*void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
+{
 
 	if(in == segmentsL)
 	{
@@ -188,4 +231,4 @@ void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8, (~(pins[i] >> 5) & 0b00000001)); //f
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9, (~(pins[i] >> 6) & 0b00000001)); //g
 
-}
+}*/
