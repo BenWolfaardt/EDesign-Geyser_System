@@ -17,3 +17,5 @@ Version 4.0: Finalised sensors code <br/>
 Version 4.1: RTC setup and partially coded <br/> 
 Version 5.0: Blank slate project file <br/> 
 Version 5.1: Code added to blank slate <br/> 
+Version 5.2: 7 segment updated <br/> 
+Version 5.3: Scheduling coded with hysteresis <br/> 
