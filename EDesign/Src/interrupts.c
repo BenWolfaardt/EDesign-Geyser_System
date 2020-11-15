@@ -34,8 +34,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	firstHighFlag = 1;
 }
 
-void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
-{
-	rtcSecFlag = 1;
-}
+//void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc)
+//{
+//	rtcSecFlag = 1;
+//}
 

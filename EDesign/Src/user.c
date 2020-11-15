@@ -23,8 +23,8 @@ char* txStudentNo = "$A,18321933\r\n";
 uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currently writing to
 
 //-------------------------Nested Flags---------------------//
-volatile bool ms3Flag;
-volatile uint8_t ms3Counter;
+//volatile bool ms3Flag;
+volatile uint16_t s1Counter;
 volatile bool ms5Flag;
 volatile uint8_t ms5Counter;
 
@@ -133,10 +133,10 @@ void UserInitialise(void)
 	segementsSet[2] = 0b0100;
 	segementsSet[3] = 0b1000;
 
-	pinsValue[0] = numberMap[1];
+	pinsValue[0] = numberMap[8];
 	pinsValue[1] = numberMap[8];
-	pinsValue[2] = numberMap[5];
-	pinsValue[3] = numberMap[2];
+	pinsValue[2] = numberMap[8];
+	pinsValue[3] = numberMap[8];
 
 	segmentsL = 4;
 
@@ -155,11 +155,7 @@ void UserInitialise(void)
 
 void DecodeCmd()
 {
-	//---------------------Prof code--------------------------//
-	//uint8_t numcharswritten;
-	//---------------------Prof code--------------------------//
-
-	uint8_t charsL;
+	//uint8_t charsL;
 
 	switch (cmdBuf[1])
 	{
@@ -180,7 +176,7 @@ void DecodeCmd()
 
 	case 'C' : //Enable/ disable automatic schedule
 		String2Int(cmdBuf+3, (int16_t*) &scheduleState);//----------------------------------------------------------default values OFF
-		//-----------------------------------------------------------------------------------------------------------------must i actualy code something?
+
 		txBuf[0] = '$';	txBuf[1] = 'C';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
@@ -211,7 +207,6 @@ void DecodeCmd()
 		txBuf[0] = '$'; txBuf[1] = 'F';	txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
 
-		//LedSet(tempSetpoint);
 		i = 0;
 
 		charsL = Int2String(tempF, tempSetpoint, 4);
@@ -246,12 +241,12 @@ void DecodeCmd()
 
 		timeL = 0;
 
-		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
-		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
-		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
-		timeL = StringTime2Int(cmdBuf+5+timeL, &HH_set);
-		timeL = StringTime2Int(cmdBuf+5+timeL, &mm_set);
-		timeL = StringTime2Int(cmdBuf+5+timeL, &ss_set);
+//		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
+//		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
+//		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
+		timeL = StringTime2Int(cmdBuf+3+timeL, &HH_set);
+		timeL = StringTime2Int(cmdBuf+3+timeL, &mm_set);
+		timeL = StringTime2Int(cmdBuf+3+timeL, &ss_set);
 
 		setDate.Year = YYYY_set;
 		setDate.Month = MM_set;
@@ -282,15 +277,13 @@ void DecodeCmd()
 
 		txBuf[0] = '$';	txBuf[1] = 'I';
 		txBuf[2] = ',';
-		txBuf[3] = '2';
-		txBuf[4] = '0';
-		charsL = 5;
-		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
-		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
-		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
-		txBuf[charsL] = ','; charsL++;
+		charsL = 3;
+//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
+//		txBuf[charsL] = ','; charsL++;
+//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
+//		txBuf[charsL] = ','; charsL++;
+//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
+//		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Hours, 2);
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Minutes, 2);
@@ -319,12 +312,12 @@ void DecodeCmd()
 		onTime[heatingWindow-1].Hours = HH_on;
 		onTime[heatingWindow-1].Minutes = mm_on;
 		onTime[heatingWindow-1].Seconds = ss_on;
-		HAL_RTC_SetTime(&hrtc, &onTime[heatingWindow-1], RTC_FORMAT_BCD);
+		//HAL_RTC_SetTime(&hrtc, &onTime[heatingWindow-1], RTC_FORMAT_BCD);
 
 		offTime[heatingWindow-1].Hours = HH_off;
 		offTime[heatingWindow-1].Minutes = mm_off;
 		offTime[heatingWindow-1].Seconds = ss_off;
-		HAL_RTC_SetTime(&hrtc, &offTime[heatingWindow-1], RTC_FORMAT_BCD);
+		//HAL_RTC_SetTime(&hrtc, &offTime[heatingWindow-1], RTC_FORMAT_BCD);
 
 		txBuf[0] = '$';	txBuf[1] = 'J';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
@@ -532,16 +525,6 @@ void Flags(void)
 	{
 		lasttick = tick;
 
-		//flowFlag = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_10);
-
-		ms3Counter++;
-		if (ms3Counter >= 1)
-		{
-			ms3Counter = 0;
-			ms3Flag = 1;
-			//writeToPins(segementsSet, pinsValue, segmentsL);
-		}
-
 		ms5Counter++;
 		if (ms5Counter >= 5)
 		{
@@ -549,26 +532,61 @@ void Flags(void)
 			ms5Flag = 1;
 		}
 
-		//LedUpdate();
-		writeToPins(segementsSet, pinsValue, segmentsL);
+		s1Counter++;
+		if (s1Counter >= 1000)
+		{
+			s1Counter = 0;
+
+			halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
+			halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
+
+			if (scheduleState == 1)
+			{
+				i = 0;
+				while (i < 3)
+				{
+					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours)
+					{
+						if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes)
+						{
+							if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds)
+							{
+								heaterState = 1;
+								i = 4;
+							}
+						}
+					}
+					else
+						heaterState = 0;
+					i++;
+				}
+				switchHeater();
+			}
+		}
+
+		writeToPins(segementsSet, pinsValue, segmentsL, i);
+		i++;
+
+		if (i == segmentsL)
+			i = 0;
 	}
 
-	if (rtcSecFlag == 1) //------------1 second period
-	{
-		rtcSecFlag = 0;
-		tick = 0;
+	//	if (rtcSecFlag == 1) //------------1 second period
+	//	{
+	//		rtcSecFlag = 0;
+	//		tick = 0;
+	//
+	//		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
+	//		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
+	//	}
 
-		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
-		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
-	}
-
-//		buffer[0] = 0x00;
+	//		buffer[0] = 0x00;
 
 
 	//halStatus = HAL_I2C_Master_Transmit_IT(&hi2c1, 0x45<<1, &buffer[0], 1);	// I2C write call
 
 
-//		HAL_I2C_Mem_Read(&hi2c1, 0x44>>1, 0x00, 2, &buffer[0], 4, 100);
+	//		HAL_I2C_Mem_Read(&hi2c1, 0x44>>1, 0x00, 2, &buffer[0], 4, 100);
 
 
 	//HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, &buffer[0], 1, 100); //45 rotary slider

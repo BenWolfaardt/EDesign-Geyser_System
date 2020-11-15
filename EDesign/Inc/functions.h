@@ -16,7 +16,7 @@ uint32_t Int2String(char* outputString, int32_t value, uint8_t maxL);
 uint8_t String2Int(char* inputString, int16_t* outputInt);
 uint8_t StringTime2Int(char* inputTimeString, uint8_t* outputTimeInt);
 
-void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL);
+void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL, uint8_t i);
 void switchHeater(void);
 void switchValve(void);
 

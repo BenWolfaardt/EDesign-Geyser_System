@@ -16,7 +16,8 @@ volatile bool uartRxFlag;
 volatile bool adcFlag;
 volatile bool flowHighFlag;
 volatile bool firstHighFlag;
-volatile bool rtcSecFlag;volatile bool i2cTxFlag;
+volatile bool rtcSecFlag;
+volatile bool i2cTxFlag;
 //volatile bool i2cErFlag;
 
 extern volatile bool ms3Flag;
@@ -36,6 +37,8 @@ uint8_t segementsSet[4]; //7 segments
 volatile uint8_t timeL; //time RTC
 
 int i, j;
+
+uint8_t charsL;
 
 
 #endif /* GLOBALS_H_ */
