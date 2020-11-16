@@ -5,15 +5,15 @@ Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .isr_vector   00000188  08000000  08000000  00010000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  1 .text         000045bc  08000188  08000188  00010188  2**2
+  1 .text         00004648  08000188  08000188  00010188  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000058  08004744  08004744  00014744  2**2
+  2 .rodata       00000058  080047d0  080047d0  000147d0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .init_array   00000004  0800479c  0800479c  0001479c  2**2
+  3 .init_array   00000004  08004828  08004828  00014828  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  4 .fini_array   00000004  080047a0  080047a0  000147a0  2**2
+  4 .fini_array   00000004  0800482c  0800482c  0001482c  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  5 .data         00000008  20000000  080047a4  00020000  2**2
+  5 .data         00000008  20000000  08004830  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
   6 .ccmram       00000000  10000000  10000000  00020008  2**0
                   CONTENTS
@@ -23,25 +23,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 00000030  00000000  00000000  00020008  2**0
                   CONTENTS, READONLY
- 10 .debug_info   00024b83  00000000  00000000  00020038  2**0
+ 10 .debug_info   00024b95  00000000  00000000  00020038  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_abbrev 0000384a  00000000  00000000  00044bbb  2**0
+ 11 .debug_abbrev 0000384a  00000000  00000000  00044bcd  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_loc    0000fc19  00000000  00000000  00048405  2**0
+ 12 .debug_loc    0000fc19  00000000  00000000  00048417  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_aranges 00001228  00000000  00000000  00058020  2**3
+ 13 .debug_aranges 00001228  00000000  00000000  00058030  2**3
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_ranges 00001178  00000000  00000000  00059248  2**3
+ 14 .debug_ranges 00001178  00000000  00000000  00059258  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_macro  0002041a  00000000  00000000  0005a3c0  2**0
+ 15 .debug_macro  0002041a  00000000  00000000  0005a3d0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_line   0000fe3e  00000000  00000000  0007a7da  2**0
+ 16 .debug_line   0000fe77  00000000  00000000  0007a7ea  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_str    000b243a  00000000  00000000  0008a618  2**0
+ 17 .debug_str    000b244b  00000000  00000000  0008a661  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .comment      0000007c  00000000  00000000  0013ca52  2**0
+ 18 .comment      0000007c  00000000  00000000  0013caac  2**0
                   CONTENTS, READONLY
- 19 .debug_frame  0000328c  00000000  00000000  0013cad0  2**2
+ 19 .debug_frame  0000328c  00000000  00000000  0013cb28  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -60,7 +60,7 @@ Disassembly of section .text:
  800019e:	bd10      	pop	{r4, pc}
  80001a0:	20000008 	.word	0x20000008
  80001a4:	00000000 	.word	0x00000000
- 80001a8:	0800472c 	.word	0x0800472c
+ 80001a8:	080047b8 	.word	0x080047b8
 
 080001ac <frame_dummy>:
  80001ac:	b508      	push	{r3, lr}
@@ -72,7 +72,7 @@ Disassembly of section .text:
  80001ba:	bd08      	pop	{r3, pc}
  80001bc:	00000000 	.word	0x00000000
  80001c0:	2000000c 	.word	0x2000000c
- 80001c4:	0800472c 	.word	0x0800472c
+ 80001c4:	080047b8 	.word	0x080047b8
 
 080001c8 <HAL_InitTick>:
   *         implementation  in user file.
@@ -4020,8 +4020,8 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  8001c28:	4770      	bx	lr
  8001c2a:	bf00      	nop
  8001c2c:	40021000 	.word	0x40021000
- 8001c30:	08004744 	.word	0x08004744
- 8001c34:	08004754 	.word	0x08004754
+ 8001c30:	080047d0 	.word	0x080047d0
+ 8001c34:	080047e0 	.word	0x080047e0
  8001c38:	003d0900 	.word	0x003d0900
  8001c3c:	007a1200 	.word	0x007a1200
 
@@ -4245,7 +4245,7 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  8001e02:	bd70      	pop	{r4, r5, r6, pc}
  8001e04:	40022000 	.word	0x40022000
  8001e08:	40021000 	.word	0x40021000
- 8001e0c:	08004774 	.word	0x08004774
+ 8001e0c:	08004800 	.word	0x08004800
  8001e10:	20000000 	.word	0x20000000
 
 08001e14 <HAL_RCC_GetHCLKFreq>:
@@ -4285,7 +4285,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  8001e40:	40d8      	lsrs	r0, r3
  8001e42:	bd08      	pop	{r3, pc}
  8001e44:	40021000 	.word	0x40021000
- 8001e48:	08004784 	.word	0x08004784
+ 8001e48:	08004810 	.word	0x08004810
 
 08001e4c <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -4311,7 +4311,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  8001e6c:	40d8      	lsrs	r0, r3
  8001e6e:	bd08      	pop	{r3, pc}
  8001e70:	40021000 	.word	0x40021000
- 8001e74:	08004784 	.word	0x08004784
+ 8001e74:	08004810 	.word	0x08004810
 
 08001e78 <HAL_RCCEx_PeriphCLKConfig>:
   *         the backup registers) and RCC_BDCR register are set to their reset values.
@@ -8172,7 +8172,7 @@ void _Error_Handler(char *file, int line)
  80035d8:	f7ff ffe4 	bl	80035a4 <_Error_Handler>
  80035dc:	200000f4 	.word	0x200000f4
  80035e0:	40013800 	.word	0x40013800
- 80035e4:	08004764 	.word	0x08004764
+ 80035e4:	080047f0 	.word	0x080047f0
 
 080035e8 <MX_ADC1_Init>:
 {
@@ -8258,7 +8258,7 @@ void _Error_Handler(char *file, int line)
  800365e:	4802      	ldr	r0, [pc, #8]	; (8003668 <MX_ADC1_Init+0x80>)
  8003660:	f7ff ffa0 	bl	80035a4 <_Error_Handler>
  8003664:	200000a0 	.word	0x200000a0
- 8003668:	08004764 	.word	0x08004764
+ 8003668:	080047f0 	.word	0x080047f0
 
 0800366c <MX_I2C1_Init>:
 {
@@ -8315,7 +8315,7 @@ void _Error_Handler(char *file, int line)
  80036c4:	20000054 	.word	0x20000054
  80036c8:	40005400 	.word	0x40005400
  80036cc:	2000090e 	.word	0x2000090e
- 80036d0:	08004764 	.word	0x08004764
+ 80036d0:	080047f0 	.word	0x080047f0
 
 080036d4 <MX_RTC_Init>:
 {
@@ -8414,7 +8414,7 @@ if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
  8003784:	f7ff ff0e 	bl	80035a4 <_Error_Handler>
  8003788:	20000164 	.word	0x20000164
  800378c:	40002800 	.word	0x40002800
- 8003790:	08004764 	.word	0x08004764
+ 8003790:	080047f0 	.word	0x080047f0
 
 08003794 <MX_TIM2_Init>:
 {
@@ -8475,7 +8475,7 @@ if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
  80037fa:	4802      	ldr	r0, [pc, #8]	; (8003804 <MX_TIM2_Init+0x70>)
  80037fc:	f7ff fed2 	bl	80035a4 <_Error_Handler>
  8003800:	20000184 	.word	0x20000184
- 8003804:	08004764 	.word	0x08004764
+ 8003804:	080047f0 	.word	0x080047f0
 
 08003808 <SystemClock_Config>:
 {
@@ -8573,7 +8573,7 @@ if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
  80038aa:	bf00      	nop
  80038ac:	000100a1 	.word	0x000100a1
  80038b0:	10624dd3 	.word	0x10624dd3
- 80038b4:	08004764 	.word	0x08004764
+ 80038b4:	080047f0 	.word	0x080047f0
 
 080038b8 <main>:
 {
@@ -9363,7 +9363,7 @@ void UserInitialise(void)
  8003cc0:	200001d0 	.word	0x200001d0
  8003cc4:	20000038 	.word	0x20000038
  8003cc8:	200003d0 	.word	0x200003d0
- 8003ccc:	20000024 	.word	0x20000024
+ 8003ccc:	20000027 	.word	0x20000027
  8003cd0:	20000318 	.word	0x20000318
  8003cd4:	200000f4 	.word	0x200000f4
  8003cd8:	20000184 	.word	0x20000184
@@ -9767,7 +9767,7 @@ void DecodeCmd()
  8003f88:	20000030 	.word	0x20000030
  8003f8c:	200001d0 	.word	0x200001d0
  8003f90:	200003d0 	.word	0x200003d0
- 8003f94:	20000024 	.word	0x20000024
+ 8003f94:	20000027 	.word	0x20000027
  8003f98:	2000002c 	.word	0x2000002c
  8003f9c:	200003ec 	.word	0x200003ec
  8003fa0:	20000314 	.word	0x20000314
@@ -10294,12 +10294,12 @@ void Flags(void)
 	//halStatus = HAL_I2C_Master_Transmit_IT(&hi2c1, 0x44<<1, &pData, 1);	// I2C write call
 
 	if (uartRxFlag)
- 8004354:	4b87      	ldr	r3, [pc, #540]	; (8004574 <Flags+0x224>)
+ 8004354:	4b8b      	ldr	r3, [pc, #556]	; (8004584 <Flags+0x234>)
  8004356:	781b      	ldrb	r3, [r3, #0]
  8004358:	b1e3      	cbz	r3, 8004394 <Flags+0x44>
 	{
 		if (uartRxChar == '$')
- 800435a:	4b87      	ldr	r3, [pc, #540]	; (8004578 <Flags+0x228>)
+ 800435a:	4b8b      	ldr	r3, [pc, #556]	; (8004588 <Flags+0x238>)
  800435c:	781a      	ldrb	r2, [r3, #0]
  800435e:	2a24      	cmp	r2, #36	; 0x24
  8004360:	d042      	beq.n	80043e8 <Flags+0x98>
@@ -10307,23 +10307,23 @@ void Flags(void)
 
 		// add character to command buffer, but only if there is more space in the command buffer
 		if (cmdBufPos < cmdBufL)
- 8004362:	4b86      	ldr	r3, [pc, #536]	; (800457c <Flags+0x22c>)
+ 8004362:	4b8a      	ldr	r3, [pc, #552]	; (800458c <Flags+0x23c>)
  8004364:	881b      	ldrh	r3, [r3, #0]
  8004366:	2b3b      	cmp	r3, #59	; 0x3b
  8004368:	d804      	bhi.n	8004374 <Flags+0x24>
 			cmdBuf[cmdBufPos++] = uartRxChar;
  800436a:	1c58      	adds	r0, r3, #1
- 800436c:	4983      	ldr	r1, [pc, #524]	; (800457c <Flags+0x22c>)
+ 800436c:	4987      	ldr	r1, [pc, #540]	; (800458c <Flags+0x23c>)
  800436e:	8008      	strh	r0, [r1, #0]
- 8004370:	4983      	ldr	r1, [pc, #524]	; (8004580 <Flags+0x230>)
+ 8004370:	4987      	ldr	r1, [pc, #540]	; (8004590 <Flags+0x240>)
  8004372:	54ca      	strb	r2, [r1, r3]
 
 		if ((cmdBufPos >= 4) && (cmdBuf[0] == '$') && (cmdBuf[cmdBufPos-2] == '\r') && (cmdBuf[cmdBufPos-1] == '\n'))
- 8004374:	4b81      	ldr	r3, [pc, #516]	; (800457c <Flags+0x22c>)
+ 8004374:	4b85      	ldr	r3, [pc, #532]	; (800458c <Flags+0x23c>)
  8004376:	881b      	ldrh	r3, [r3, #0]
  8004378:	2b03      	cmp	r3, #3
  800437a:	d903      	bls.n	8004384 <Flags+0x34>
- 800437c:	4a80      	ldr	r2, [pc, #512]	; (8004580 <Flags+0x230>)
+ 800437c:	4a84      	ldr	r2, [pc, #528]	; (8004590 <Flags+0x240>)
  800437e:	7812      	ldrb	r2, [r2, #0]
  8004380:	2a24      	cmp	r2, #36	; 0x24
  8004382:	d035      	beq.n	80043f0 <Flags+0xa0>
@@ -10333,16 +10333,16 @@ void Flags(void)
 		}
 		uartRxFlag = false;  // clear the flag - the 'receive character' event has been handled.
  8004384:	2200      	movs	r2, #0
- 8004386:	4b7b      	ldr	r3, [pc, #492]	; (8004574 <Flags+0x224>)
+ 8004386:	4b7f      	ldr	r3, [pc, #508]	; (8004584 <Flags+0x234>)
  8004388:	701a      	strb	r2, [r3, #0]
 		HAL_UART_Receive_IT(&huart1, (uint8_t*)&uartRxChar, 1);	// UART interrupt after 1 character was received
  800438a:	2201      	movs	r2, #1
- 800438c:	497a      	ldr	r1, [pc, #488]	; (8004578 <Flags+0x228>)
- 800438e:	487d      	ldr	r0, [pc, #500]	; (8004584 <Flags+0x234>)
+ 800438c:	497e      	ldr	r1, [pc, #504]	; (8004588 <Flags+0x238>)
+ 800438e:	4881      	ldr	r0, [pc, #516]	; (8004594 <Flags+0x244>)
  8004390:	f7fe faff 	bl	8002992 <HAL_UART_Receive_IT>
 	}
 	if(adcFlag == 1U)
- 8004394:	4b7c      	ldr	r3, [pc, #496]	; (8004588 <Flags+0x238>)
+ 8004394:	4b80      	ldr	r3, [pc, #512]	; (8004598 <Flags+0x248>)
  8004396:	781b      	ldrb	r3, [r3, #0]
  8004398:	2b00      	cmp	r3, #0
  800439a:	d069      	beq.n	8004470 <Flags+0x120>
@@ -10352,7 +10352,7 @@ void Flags(void)
 		// the result is that all ADC 4 channels are sampled every 1ms
 
 		if (adcCh == 0)
- 800439c:	4b7b      	ldr	r3, [pc, #492]	; (800458c <Flags+0x23c>)
+ 800439c:	4b7f      	ldr	r3, [pc, #508]	; (800459c <Flags+0x24c>)
  800439e:	781b      	ldrb	r3, [r3, #0]
  80043a0:	2b00      	cmp	r3, #0
  80043a2:	d034      	beq.n	800440e <Flags+0xbe>
@@ -10379,7 +10379,7 @@ void Flags(void)
 		}
 
 		adcCh++;
- 80043b0:	4a76      	ldr	r2, [pc, #472]	; (800458c <Flags+0x23c>)
+ 80043b0:	4a7a      	ldr	r2, [pc, #488]	; (800459c <Flags+0x24c>)
  80043b2:	7813      	ldrb	r3, [r2, #0]
  80043b4:	3301      	adds	r3, #1
  80043b6:	b2db      	uxtb	r3, r3
@@ -10390,10 +10390,10 @@ void Flags(void)
 		{
 			adcCh = 0;
  80043be:	2200      	movs	r2, #0
- 80043c0:	4b72      	ldr	r3, [pc, #456]	; (800458c <Flags+0x23c>)
+ 80043c0:	4b76      	ldr	r3, [pc, #472]	; (800459c <Flags+0x24c>)
  80043c2:	701a      	strb	r2, [r3, #0]
 			sampleCntr++;
- 80043c4:	4a72      	ldr	r2, [pc, #456]	; (8004590 <Flags+0x240>)
+ 80043c4:	4a76      	ldr	r2, [pc, #472]	; (80045a0 <Flags+0x250>)
  80043c6:	7813      	ldrb	r3, [r2, #0]
  80043c8:	3301      	adds	r3, #1
  80043ca:	b2db      	uxtb	r3, r3
@@ -10409,7 +10409,7 @@ void Flags(void)
 				adcBuf13 = 0;*/
 				sampleCntr = 0;
  80043d2:	2200      	movs	r2, #0
- 80043d4:	4b6e      	ldr	r3, [pc, #440]	; (8004590 <Flags+0x240>)
+ 80043d4:	4b72      	ldr	r3, [pc, #456]	; (80045a0 <Flags+0x250>)
  80043d6:	701a      	strb	r2, [r3, #0]
 				temp12 += adc12;*/
 			}
@@ -10417,7 +10417,7 @@ void Flags(void)
 
 		ADC_ChannelConfTypeDef chdef;
 		switch (adcCh)
- 80043d8:	4b6c      	ldr	r3, [pc, #432]	; (800458c <Flags+0x23c>)
+ 80043d8:	4b70      	ldr	r3, [pc, #448]	; (800459c <Flags+0x24c>)
  80043da:	781b      	ldrb	r3, [r3, #0]
  80043dc:	2b03      	cmp	r3, #3
  80043de:	d836      	bhi.n	800444e <Flags+0xfe>
@@ -10425,12 +10425,12 @@ void Flags(void)
  80043e4:	a19e9b33 	.word	0xa19e9b33
 			cmdBufPos = 0;
  80043e8:	2100      	movs	r1, #0
- 80043ea:	4b64      	ldr	r3, [pc, #400]	; (800457c <Flags+0x22c>)
+ 80043ea:	4b68      	ldr	r3, [pc, #416]	; (800458c <Flags+0x23c>)
  80043ec:	8019      	strh	r1, [r3, #0]
  80043ee:	e7b8      	b.n	8004362 <Flags+0x12>
 		if ((cmdBufPos >= 4) && (cmdBuf[0] == '$') && (cmdBuf[cmdBufPos-2] == '\r') && (cmdBuf[cmdBufPos-1] == '\n'))
  80043f0:	1e9a      	subs	r2, r3, #2
- 80043f2:	4963      	ldr	r1, [pc, #396]	; (8004580 <Flags+0x230>)
+ 80043f2:	4967      	ldr	r1, [pc, #412]	; (8004590 <Flags+0x240>)
  80043f4:	5c8a      	ldrb	r2, [r1, r2]
  80043f6:	2a0d      	cmp	r2, #13
  80043f8:	d1c4      	bne.n	8004384 <Flags+0x34>
@@ -10442,35 +10442,35 @@ void Flags(void)
  8004402:	f7ff fc6d 	bl	8003ce0 <DecodeCmd>
 			cmdBufPos = 0;	// clear buffer
  8004406:	2200      	movs	r2, #0
- 8004408:	4b5c      	ldr	r3, [pc, #368]	; (800457c <Flags+0x22c>)
+ 8004408:	4b60      	ldr	r3, [pc, #384]	; (800458c <Flags+0x23c>)
  800440a:	801a      	strh	r2, [r3, #0]
  800440c:	e7ba      	b.n	8004384 <Flags+0x34>
 			vsample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
- 800440e:	4b60      	ldr	r3, [pc, #384]	; (8004590 <Flags+0x240>)
+ 800440e:	4b64      	ldr	r3, [pc, #400]	; (80045a0 <Flags+0x250>)
  8004410:	781c      	ldrb	r4, [r3, #0]
- 8004412:	4860      	ldr	r0, [pc, #384]	; (8004594 <Flags+0x244>)
+ 8004412:	4864      	ldr	r0, [pc, #400]	; (80045a4 <Flags+0x254>)
  8004414:	f7fc f924 	bl	8000660 <HAL_ADC_GetValue>
- 8004418:	4b5f      	ldr	r3, [pc, #380]	; (8004598 <Flags+0x248>)
+ 8004418:	4b63      	ldr	r3, [pc, #396]	; (80045a8 <Flags+0x258>)
  800441a:	f823 0014 	strh.w	r0, [r3, r4, lsl #1]
  800441e:	e7c7      	b.n	80043b0 <Flags+0x60>
 			isample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
- 8004420:	4b5b      	ldr	r3, [pc, #364]	; (8004590 <Flags+0x240>)
+ 8004420:	4b5f      	ldr	r3, [pc, #380]	; (80045a0 <Flags+0x250>)
  8004422:	781c      	ldrb	r4, [r3, #0]
- 8004424:	485b      	ldr	r0, [pc, #364]	; (8004594 <Flags+0x244>)
+ 8004424:	485f      	ldr	r0, [pc, #380]	; (80045a4 <Flags+0x254>)
  8004426:	f7fc f91b 	bl	8000660 <HAL_ADC_GetValue>
- 800442a:	4b5c      	ldr	r3, [pc, #368]	; (800459c <Flags+0x24c>)
+ 800442a:	4b60      	ldr	r3, [pc, #384]	; (80045ac <Flags+0x25c>)
  800442c:	f823 0014 	strh.w	r0, [r3, r4, lsl #1]
  8004430:	e7be      	b.n	80043b0 <Flags+0x60>
 			ambientT = HAL_ADC_GetValue(&hadc1);
- 8004432:	4858      	ldr	r0, [pc, #352]	; (8004594 <Flags+0x244>)
+ 8004432:	485c      	ldr	r0, [pc, #368]	; (80045a4 <Flags+0x254>)
  8004434:	f7fc f914 	bl	8000660 <HAL_ADC_GetValue>
- 8004438:	4b59      	ldr	r3, [pc, #356]	; (80045a0 <Flags+0x250>)
+ 8004438:	4b5d      	ldr	r3, [pc, #372]	; (80045b0 <Flags+0x260>)
  800443a:	6018      	str	r0, [r3, #0]
  800443c:	e7b8      	b.n	80043b0 <Flags+0x60>
 			waterT = HAL_ADC_GetValue(&hadc1);
- 800443e:	4855      	ldr	r0, [pc, #340]	; (8004594 <Flags+0x244>)
+ 800443e:	4859      	ldr	r0, [pc, #356]	; (80045a4 <Flags+0x254>)
  8004440:	f7fc f90e 	bl	8000660 <HAL_ADC_GetValue>
- 8004444:	4b57      	ldr	r3, [pc, #348]	; (80045a4 <Flags+0x254>)
+ 8004444:	4b5b      	ldr	r3, [pc, #364]	; (80045b4 <Flags+0x264>)
  8004446:	6018      	str	r0, [r3, #0]
  8004448:	e7b2      	b.n	80043b0 <Flags+0x60>
 		{
@@ -10495,7 +10495,7 @@ void Flags(void)
 		chdef.Offset = 0;
  800445a:	9405      	str	r4, [sp, #20]
 		HAL_ADC_ConfigChannel(&hadc1, &chdef);
- 800445c:	4d4d      	ldr	r5, [pc, #308]	; (8004594 <Flags+0x244>)
+ 800445c:	4d51      	ldr	r5, [pc, #324]	; (80045a4 <Flags+0x254>)
  800445e:	4669      	mov	r1, sp
  8004460:	4628      	mov	r0, r5
  8004462:	f7fc f901 	bl	8000668 <HAL_ADC_ConfigChannel>
@@ -10505,46 +10505,46 @@ void Flags(void)
  8004468:	f7fc f878 	bl	800055c <HAL_ADC_Start>
 
 		adcFlag = 0;
- 800446c:	4b46      	ldr	r3, [pc, #280]	; (8004588 <Flags+0x238>)
+ 800446c:	4b4a      	ldr	r3, [pc, #296]	; (8004598 <Flags+0x248>)
  800446e:	701c      	strb	r4, [r3, #0]
 	}
 
 	if (flowHighFlag == 1)
- 8004470:	4b4d      	ldr	r3, [pc, #308]	; (80045a8 <Flags+0x258>)
+ 8004470:	4b51      	ldr	r3, [pc, #324]	; (80045b8 <Flags+0x268>)
  8004472:	781b      	ldrb	r3, [r3, #0]
  8004474:	b1c3      	cbz	r3, 80044a8 <Flags+0x158>
 	{
 		if (firstHighFlag == 1)
- 8004476:	4b4d      	ldr	r3, [pc, #308]	; (80045ac <Flags+0x25c>)
+ 8004476:	4b51      	ldr	r3, [pc, #324]	; (80045bc <Flags+0x26c>)
  8004478:	781b      	ldrb	r3, [r3, #0]
  800447a:	b143      	cbz	r3, 800448e <Flags+0x13e>
 		{
 			firstHighFlag = 0;
  800447c:	2300      	movs	r3, #0
- 800447e:	4a4b      	ldr	r2, [pc, #300]	; (80045ac <Flags+0x25c>)
+ 800447e:	4a4f      	ldr	r2, [pc, #316]	; (80045bc <Flags+0x26c>)
  8004480:	7013      	strb	r3, [r2, #0]
 			ms5Counter = 0;
- 8004482:	4a4b      	ldr	r2, [pc, #300]	; (80045b0 <Flags+0x260>)
+ 8004482:	4a4f      	ldr	r2, [pc, #316]	; (80045c0 <Flags+0x270>)
  8004484:	7013      	strb	r3, [r2, #0]
 			ms5Flag = 0;
- 8004486:	4a4b      	ldr	r2, [pc, #300]	; (80045b4 <Flags+0x264>)
+ 8004486:	4a4f      	ldr	r2, [pc, #316]	; (80045c4 <Flags+0x274>)
  8004488:	7013      	strb	r3, [r2, #0]
 			flowPulse = 0;
- 800448a:	4a4b      	ldr	r2, [pc, #300]	; (80045b8 <Flags+0x268>)
+ 800448a:	4a4f      	ldr	r2, [pc, #316]	; (80045c8 <Flags+0x278>)
  800448c:	7013      	strb	r3, [r2, #0]
 		}
 		if (ms5Flag == 1)
- 800448e:	4b49      	ldr	r3, [pc, #292]	; (80045b4 <Flags+0x264>)
+ 800448e:	4b4d      	ldr	r3, [pc, #308]	; (80045c4 <Flags+0x274>)
  8004490:	781b      	ldrb	r3, [r3, #0]
  8004492:	b14b      	cbz	r3, 80044a8 <Flags+0x158>
 		{
 			ms5Flag = 0;
  8004494:	2200      	movs	r2, #0
- 8004496:	4b47      	ldr	r3, [pc, #284]	; (80045b4 <Flags+0x264>)
+ 8004496:	4b4b      	ldr	r3, [pc, #300]	; (80045c4 <Flags+0x274>)
  8004498:	701a      	strb	r2, [r3, #0]
 
 			flowPulse++;
- 800449a:	4a47      	ldr	r2, [pc, #284]	; (80045b8 <Flags+0x268>)
+ 800449a:	4a4b      	ldr	r2, [pc, #300]	; (80045c8 <Flags+0x278>)
  800449c:	7813      	ldrb	r3, [r2, #0]
  800449e:	3301      	adds	r3, #1
  80044a0:	b2db      	uxtb	r3, r3
@@ -10560,17 +10560,17 @@ void Flags(void)
 	uint32_t tick = HAL_GetTick();
  80044a8:	f7fb febe 	bl	8000228 <HAL_GetTick>
 	if (tick != lasttick)
- 80044ac:	4b43      	ldr	r3, [pc, #268]	; (80045bc <Flags+0x26c>)
+ 80044ac:	4b47      	ldr	r3, [pc, #284]	; (80045cc <Flags+0x27c>)
  80044ae:	681b      	ldr	r3, [r3, #0]
  80044b0:	4298      	cmp	r0, r3
  80044b2:	d02a      	beq.n	800450a <Flags+0x1ba>
 	{
 		lasttick = tick;
- 80044b4:	4b41      	ldr	r3, [pc, #260]	; (80045bc <Flags+0x26c>)
+ 80044b4:	4b45      	ldr	r3, [pc, #276]	; (80045cc <Flags+0x27c>)
  80044b6:	6018      	str	r0, [r3, #0]
 
 		ms5Counter++;
- 80044b8:	4a3d      	ldr	r2, [pc, #244]	; (80045b0 <Flags+0x260>)
+ 80044b8:	4a41      	ldr	r2, [pc, #260]	; (80045c0 <Flags+0x270>)
  80044ba:	7813      	ldrb	r3, [r2, #0]
  80044bc:	3301      	adds	r3, #1
  80044be:	b2db      	uxtb	r3, r3
@@ -10583,16 +10583,16 @@ void Flags(void)
 		{
 			ms5Counter = 0;
  80044ca:	2200      	movs	r2, #0
- 80044cc:	4b38      	ldr	r3, [pc, #224]	; (80045b0 <Flags+0x260>)
+ 80044cc:	4b3c      	ldr	r3, [pc, #240]	; (80045c0 <Flags+0x270>)
  80044ce:	701a      	strb	r2, [r3, #0]
 			ms5Flag = 1;
  80044d0:	2201      	movs	r2, #1
- 80044d2:	4b38      	ldr	r3, [pc, #224]	; (80045b4 <Flags+0x264>)
+ 80044d2:	4b3c      	ldr	r3, [pc, #240]	; (80045c4 <Flags+0x274>)
  80044d4:	701a      	strb	r2, [r3, #0]
 		}
 
 		s1Counter++;
- 80044d6:	4a3a      	ldr	r2, [pc, #232]	; (80045c0 <Flags+0x270>)
+ 80044d6:	4a3e      	ldr	r2, [pc, #248]	; (80045d0 <Flags+0x280>)
  80044d8:	8813      	ldrh	r3, [r2, #0]
  80044da:	b29b      	uxth	r3, r3
  80044dc:	3301      	adds	r3, #1
@@ -10609,12 +10609,12 @@ void Flags(void)
 		}
 
 		writeToPins(segementsSet, pinsValue, segmentsL, i);
- 80044ec:	4c35      	ldr	r4, [pc, #212]	; (80045c4 <Flags+0x274>)
- 80044ee:	4d36      	ldr	r5, [pc, #216]	; (80045c8 <Flags+0x278>)
+ 80044ec:	4c39      	ldr	r4, [pc, #228]	; (80045d4 <Flags+0x284>)
+ 80044ee:	4d3a      	ldr	r5, [pc, #232]	; (80045d8 <Flags+0x288>)
  80044f0:	7823      	ldrb	r3, [r4, #0]
  80044f2:	782a      	ldrb	r2, [r5, #0]
- 80044f4:	4935      	ldr	r1, [pc, #212]	; (80045cc <Flags+0x27c>)
- 80044f6:	4836      	ldr	r0, [pc, #216]	; (80045d0 <Flags+0x280>)
+ 80044f4:	4939      	ldr	r1, [pc, #228]	; (80045dc <Flags+0x28c>)
+ 80044f6:	483a      	ldr	r0, [pc, #232]	; (80045e0 <Flags+0x290>)
  80044f8:	f7fe ff00 	bl	80032fc <writeToPins>
 		i++;
  80044fc:	6823      	ldr	r3, [r4, #0]
@@ -10624,20 +10624,20 @@ void Flags(void)
 		if (i == segmentsL)
  8004502:	782a      	ldrb	r2, [r5, #0]
  8004504:	4293      	cmp	r3, r2
- 8004506:	f000 80b5 	beq.w	8004674 <Flags+0x324>
+ 8004506:	f000 80f6 	beq.w	80046f6 <Flags+0x3a6>
 	//HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[1], 3, 100);
 	//HAL_I2C_Master_Transmit(&hi2c1, 0x45<<1, buffer, 4, 100); //45 rotary slider
 	//HAL_I2C_Master_Receive(&hi2c1, 0x45<<1, &buffer[0], 1, 100);
 
 
 	if (i2cTxFlag)	//Now process the interrupt call-back
- 800450a:	4b32      	ldr	r3, [pc, #200]	; (80045d4 <Flags+0x284>)
+ 800450a:	4b36      	ldr	r3, [pc, #216]	; (80045e4 <Flags+0x294>)
  800450c:	781b      	ldrb	r3, [r3, #0]
  800450e:	b113      	cbz	r3, 8004516 <Flags+0x1c6>
 	{
 		i2cTxFlag = 0;
  8004510:	2200      	movs	r2, #0
- 8004512:	4b30      	ldr	r3, [pc, #192]	; (80045d4 <Flags+0x284>)
+ 8004512:	4b34      	ldr	r3, [pc, #208]	; (80045e4 <Flags+0x294>)
  8004514:	701a      	strb	r2, [r3, #0]
 		//float value = buffer[0]<<8 | buffer[1]; //combine 2 8-bit into 1 16-bit
 
@@ -10660,302 +10660,375 @@ void Flags(void)
  8004528:	9300      	str	r3, [sp, #0]
  800452a:	e790      	b.n	800444e <Flags+0xfe>
 				flowCounter++;
- 800452c:	4a2a      	ldr	r2, [pc, #168]	; (80045d8 <Flags+0x288>)
+ 800452c:	4a2e      	ldr	r2, [pc, #184]	; (80045e8 <Flags+0x298>)
  800452e:	6813      	ldr	r3, [r2, #0]
  8004530:	3301      	adds	r3, #1
  8004532:	6013      	str	r3, [r2, #0]
 				totalFlow = 100*flowCounter;
  8004534:	2264      	movs	r2, #100	; 0x64
  8004536:	fb02 f303 	mul.w	r3, r2, r3
- 800453a:	4a28      	ldr	r2, [pc, #160]	; (80045dc <Flags+0x28c>)
+ 800453a:	4a2c      	ldr	r2, [pc, #176]	; (80045ec <Flags+0x29c>)
  800453c:	6013      	str	r3, [r2, #0]
  800453e:	e7b3      	b.n	80044a8 <Flags+0x158>
 			s1Counter = 0;
  8004540:	2200      	movs	r2, #0
- 8004542:	4b1f      	ldr	r3, [pc, #124]	; (80045c0 <Flags+0x270>)
+ 8004542:	4b23      	ldr	r3, [pc, #140]	; (80045d0 <Flags+0x280>)
  8004544:	801a      	strh	r2, [r3, #0]
 			halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
- 8004546:	4d26      	ldr	r5, [pc, #152]	; (80045e0 <Flags+0x290>)
+ 8004546:	4d2a      	ldr	r5, [pc, #168]	; (80045f0 <Flags+0x2a0>)
  8004548:	2201      	movs	r2, #1
- 800454a:	4926      	ldr	r1, [pc, #152]	; (80045e4 <Flags+0x294>)
+ 800454a:	492a      	ldr	r1, [pc, #168]	; (80045f4 <Flags+0x2a4>)
  800454c:	4628      	mov	r0, r5
  800454e:	f7fd ff02 	bl	8002356 <HAL_RTC_GetTime>
- 8004552:	4c25      	ldr	r4, [pc, #148]	; (80045e8 <Flags+0x298>)
+ 8004552:	4c29      	ldr	r4, [pc, #164]	; (80045f8 <Flags+0x2a8>)
  8004554:	7020      	strb	r0, [r4, #0]
 			halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
  8004556:	2201      	movs	r2, #1
- 8004558:	4924      	ldr	r1, [pc, #144]	; (80045ec <Flags+0x29c>)
+ 8004558:	4928      	ldr	r1, [pc, #160]	; (80045fc <Flags+0x2ac>)
  800455a:	4628      	mov	r0, r5
  800455c:	f7fd ff26 	bl	80023ac <HAL_RTC_GetDate>
  8004560:	7020      	strb	r0, [r4, #0]
 			if (scheduleState == 1)
- 8004562:	4b23      	ldr	r3, [pc, #140]	; (80045f0 <Flags+0x2a0>)
+ 8004562:	4b27      	ldr	r3, [pc, #156]	; (8004600 <Flags+0x2b0>)
  8004564:	881b      	ldrh	r3, [r3, #0]
  8004566:	b21b      	sxth	r3, r3
  8004568:	2b01      	cmp	r3, #1
  800456a:	d1bf      	bne.n	80044ec <Flags+0x19c>
 				i = 0;
  800456c:	2200      	movs	r2, #0
- 800456e:	4b15      	ldr	r3, [pc, #84]	; (80045c4 <Flags+0x274>)
+ 800456e:	4b19      	ldr	r3, [pc, #100]	; (80045d4 <Flags+0x284>)
  8004570:	601a      	str	r2, [r3, #0]
 				while (i < 3)
- 8004572:	e046      	b.n	8004602 <Flags+0x2b2>
- 8004574:	2000004b 	.word	0x2000004b
- 8004578:	20000318 	.word	0x20000318
- 800457c:	20000412 	.word	0x20000412
- 8004580:	20000390 	.word	0x20000390
- 8004584:	200000f4 	.word	0x200000f4
- 8004588:	2000004e 	.word	0x2000004e
- 800458c:	200003f5 	.word	0x200003f5
- 8004590:	200001cc 	.word	0x200001cc
- 8004594:	200000a0 	.word	0x200000a0
- 8004598:	200002bc 	.word	0x200002bc
- 800459c:	20000338 	.word	0x20000338
- 80045a0:	200001c8 	.word	0x200001c8
- 80045a4:	2000040c 	.word	0x2000040c
- 80045a8:	2000004a 	.word	0x2000004a
- 80045ac:	20000035 	.word	0x20000035
- 80045b0:	200003cc 	.word	0x200003cc
- 80045b4:	20000221 	.word	0x20000221
- 80045b8:	200003f3 	.word	0x200003f3
- 80045bc:	20000240 	.word	0x20000240
- 80045c0:	200003d4 	.word	0x200003d4
- 80045c4:	20000040 	.word	0x20000040
- 80045c8:	20000024 	.word	0x20000024
- 80045cc:	200003d0 	.word	0x200003d0
- 80045d0:	20000038 	.word	0x20000038
- 80045d4:	2000004d 	.word	0x2000004d
- 80045d8:	200003fc 	.word	0x200003fc
- 80045dc:	20000408 	.word	0x20000408
- 80045e0:	20000164 	.word	0x20000164
- 80045e4:	2000022c 	.word	0x2000022c
- 80045e8:	20000222 	.word	0x20000222
- 80045ec:	20000414 	.word	0x20000414
- 80045f0:	20000050 	.word	0x20000050
-						heaterState = 0;
- 80045f4:	2200      	movs	r2, #0
- 80045f6:	4b21      	ldr	r3, [pc, #132]	; (800467c <Flags+0x32c>)
- 80045f8:	801a      	strh	r2, [r3, #0]
+ 8004572:	e05b      	b.n	800462c <Flags+0x2dc>
+							minFlag = 1;
+ 8004574:	4a23      	ldr	r2, [pc, #140]	; (8004604 <Flags+0x2b4>)
+ 8004576:	7014      	strb	r4, [r2, #0]
+ 8004578:	e074      	b.n	8004664 <Flags+0x314>
+							secFlag = 1;
+ 800457a:	2101      	movs	r1, #1
+ 800457c:	4a22      	ldr	r2, [pc, #136]	; (8004608 <Flags+0x2b8>)
+ 800457e:	7011      	strb	r1, [r2, #0]
+ 8004580:	e08b      	b.n	800469a <Flags+0x34a>
+ 8004582:	bf00      	nop
+ 8004584:	2000004b 	.word	0x2000004b
+ 8004588:	20000318 	.word	0x20000318
+ 800458c:	20000412 	.word	0x20000412
+ 8004590:	20000390 	.word	0x20000390
+ 8004594:	200000f4 	.word	0x200000f4
+ 8004598:	2000004e 	.word	0x2000004e
+ 800459c:	200003f5 	.word	0x200003f5
+ 80045a0:	200001cc 	.word	0x200001cc
+ 80045a4:	200000a0 	.word	0x200000a0
+ 80045a8:	200002bc 	.word	0x200002bc
+ 80045ac:	20000338 	.word	0x20000338
+ 80045b0:	200001c8 	.word	0x200001c8
+ 80045b4:	2000040c 	.word	0x2000040c
+ 80045b8:	2000004a 	.word	0x2000004a
+ 80045bc:	20000035 	.word	0x20000035
+ 80045c0:	200003cc 	.word	0x200003cc
+ 80045c4:	20000221 	.word	0x20000221
+ 80045c8:	200003f3 	.word	0x200003f3
+ 80045cc:	20000240 	.word	0x20000240
+ 80045d0:	200003d4 	.word	0x200003d4
+ 80045d4:	20000040 	.word	0x20000040
+ 80045d8:	20000027 	.word	0x20000027
+ 80045dc:	200003d0 	.word	0x200003d0
+ 80045e0:	20000038 	.word	0x20000038
+ 80045e4:	2000004d 	.word	0x2000004d
+ 80045e8:	200003fc 	.word	0x200003fc
+ 80045ec:	20000408 	.word	0x20000408
+ 80045f0:	20000164 	.word	0x20000164
+ 80045f4:	2000022c 	.word	0x2000022c
+ 80045f8:	20000222 	.word	0x20000222
+ 80045fc:	20000414 	.word	0x20000414
+ 8004600:	20000050 	.word	0x20000050
+ 8004604:	20000025 	.word	0x20000025
+ 8004608:	20000026 	.word	0x20000026
+					if (hourFlag == 1 || minFlag == 1 || secFlag == 1)
+ 800460c:	4a3b      	ldr	r2, [pc, #236]	; (80046fc <Flags+0x3ac>)
+ 800460e:	7812      	ldrb	r2, [r2, #0]
+ 8004610:	b932      	cbnz	r2, 8004620 <Flags+0x2d0>
+ 8004612:	4a3b      	ldr	r2, [pc, #236]	; (8004700 <Flags+0x3b0>)
+ 8004614:	7812      	ldrb	r2, [r2, #0]
+ 8004616:	b91a      	cbnz	r2, 8004620 <Flags+0x2d0>
+ 8004618:	4a3a      	ldr	r2, [pc, #232]	; (8004704 <Flags+0x3b4>)
+ 800461a:	7812      	ldrb	r2, [r2, #0]
+ 800461c:	2a00      	cmp	r2, #0
+ 800461e:	d063      	beq.n	80046e8 <Flags+0x398>
+						heaterState = 1;
+ 8004620:	2101      	movs	r1, #1
+ 8004622:	4a39      	ldr	r2, [pc, #228]	; (8004708 <Flags+0x3b8>)
+ 8004624:	8011      	strh	r1, [r2, #0]
 					i++;
- 80045fa:	4a21      	ldr	r2, [pc, #132]	; (8004680 <Flags+0x330>)
- 80045fc:	6813      	ldr	r3, [r2, #0]
- 80045fe:	3301      	adds	r3, #1
- 8004600:	6013      	str	r3, [r2, #0]
+ 8004626:	3301      	adds	r3, #1
+ 8004628:	4a38      	ldr	r2, [pc, #224]	; (800470c <Flags+0x3bc>)
+ 800462a:	6013      	str	r3, [r2, #0]
 				while (i < 3)
- 8004602:	4b1f      	ldr	r3, [pc, #124]	; (8004680 <Flags+0x330>)
- 8004604:	681b      	ldr	r3, [r3, #0]
- 8004606:	2b02      	cmp	r3, #2
- 8004608:	dc31      	bgt.n	800466e <Flags+0x31e>
-					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours)
- 800460a:	4a1e      	ldr	r2, [pc, #120]	; (8004684 <Flags+0x334>)
- 800460c:	7810      	ldrb	r0, [r2, #0]
- 800460e:	eb03 0183 	add.w	r1, r3, r3, lsl #2
- 8004612:	008a      	lsls	r2, r1, #2
- 8004614:	491c      	ldr	r1, [pc, #112]	; (8004688 <Flags+0x338>)
- 8004616:	5c8a      	ldrb	r2, [r1, r2]
- 8004618:	4290      	cmp	r0, r2
- 800461a:	d3eb      	bcc.n	80045f4 <Flags+0x2a4>
- 800461c:	eb03 0183 	add.w	r1, r3, r3, lsl #2
- 8004620:	008a      	lsls	r2, r1, #2
- 8004622:	491a      	ldr	r1, [pc, #104]	; (800468c <Flags+0x33c>)
- 8004624:	5c8a      	ldrb	r2, [r1, r2]
- 8004626:	4290      	cmp	r0, r2
- 8004628:	d8e4      	bhi.n	80045f4 <Flags+0x2a4>
-						if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes)
- 800462a:	4a16      	ldr	r2, [pc, #88]	; (8004684 <Flags+0x334>)
- 800462c:	7850      	ldrb	r0, [r2, #1]
- 800462e:	eb03 0283 	add.w	r2, r3, r3, lsl #2
- 8004632:	0091      	lsls	r1, r2, #2
- 8004634:	4a14      	ldr	r2, [pc, #80]	; (8004688 <Flags+0x338>)
- 8004636:	440a      	add	r2, r1
- 8004638:	7852      	ldrb	r2, [r2, #1]
- 800463a:	4290      	cmp	r0, r2
- 800463c:	d3dd      	bcc.n	80045fa <Flags+0x2aa>
- 800463e:	4a13      	ldr	r2, [pc, #76]	; (800468c <Flags+0x33c>)
- 8004640:	440a      	add	r2, r1
- 8004642:	7852      	ldrb	r2, [r2, #1]
- 8004644:	4290      	cmp	r0, r2
- 8004646:	d8d8      	bhi.n	80045fa <Flags+0x2aa>
-							if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds)
- 8004648:	4a0e      	ldr	r2, [pc, #56]	; (8004684 <Flags+0x334>)
- 800464a:	7890      	ldrb	r0, [r2, #2]
- 800464c:	4a0e      	ldr	r2, [pc, #56]	; (8004688 <Flags+0x338>)
- 800464e:	440a      	add	r2, r1
- 8004650:	7892      	ldrb	r2, [r2, #2]
- 8004652:	4290      	cmp	r0, r2
- 8004654:	d3d1      	bcc.n	80045fa <Flags+0x2aa>
- 8004656:	4b0d      	ldr	r3, [pc, #52]	; (800468c <Flags+0x33c>)
- 8004658:	440b      	add	r3, r1
- 800465a:	789b      	ldrb	r3, [r3, #2]
- 800465c:	4298      	cmp	r0, r3
- 800465e:	d8cc      	bhi.n	80045fa <Flags+0x2aa>
-								heaterState = 1;
- 8004660:	2201      	movs	r2, #1
- 8004662:	4b06      	ldr	r3, [pc, #24]	; (800467c <Flags+0x32c>)
- 8004664:	801a      	strh	r2, [r3, #0]
-								i = 4;
- 8004666:	2204      	movs	r2, #4
- 8004668:	4b05      	ldr	r3, [pc, #20]	; (8004680 <Flags+0x330>)
- 800466a:	601a      	str	r2, [r3, #0]
- 800466c:	e7c5      	b.n	80045fa <Flags+0x2aa>
+ 800462c:	4b37      	ldr	r3, [pc, #220]	; (800470c <Flags+0x3bc>)
+ 800462e:	681b      	ldr	r3, [r3, #0]
+ 8004630:	2b02      	cmp	r3, #2
+ 8004632:	dc5d      	bgt.n	80046f0 <Flags+0x3a0>
+					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours && minFlag == 0)
+ 8004634:	4a36      	ldr	r2, [pc, #216]	; (8004710 <Flags+0x3c0>)
+ 8004636:	7810      	ldrb	r0, [r2, #0]
+ 8004638:	eb03 0183 	add.w	r1, r3, r3, lsl #2
+ 800463c:	008a      	lsls	r2, r1, #2
+ 800463e:	4935      	ldr	r1, [pc, #212]	; (8004714 <Flags+0x3c4>)
+ 8004640:	5c8a      	ldrb	r2, [r1, r2]
+ 8004642:	4290      	cmp	r0, r2
+ 8004644:	d30e      	bcc.n	8004664 <Flags+0x314>
+ 8004646:	eb03 0183 	add.w	r1, r3, r3, lsl #2
+ 800464a:	008a      	lsls	r2, r1, #2
+ 800464c:	4932      	ldr	r1, [pc, #200]	; (8004718 <Flags+0x3c8>)
+ 800464e:	5c8a      	ldrb	r2, [r1, r2]
+ 8004650:	4290      	cmp	r0, r2
+ 8004652:	d807      	bhi.n	8004664 <Flags+0x314>
+ 8004654:	492a      	ldr	r1, [pc, #168]	; (8004700 <Flags+0x3b0>)
+ 8004656:	7809      	ldrb	r1, [r1, #0]
+ 8004658:	b921      	cbnz	r1, 8004664 <Flags+0x314>
+						hourFlag = 1;
+ 800465a:	2401      	movs	r4, #1
+ 800465c:	4927      	ldr	r1, [pc, #156]	; (80046fc <Flags+0x3ac>)
+ 800465e:	700c      	strb	r4, [r1, #0]
+						if (getTimeLive.Hours ==  offTime[i].Hours)
+ 8004660:	4290      	cmp	r0, r2
+ 8004662:	d087      	beq.n	8004574 <Flags+0x224>
+					if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes && hourFlag == 1 && minFlag == 1 && secFlag == 0)
+ 8004664:	4a2a      	ldr	r2, [pc, #168]	; (8004710 <Flags+0x3c0>)
+ 8004666:	7850      	ldrb	r0, [r2, #1]
+ 8004668:	eb03 0283 	add.w	r2, r3, r3, lsl #2
+ 800466c:	0091      	lsls	r1, r2, #2
+ 800466e:	4a29      	ldr	r2, [pc, #164]	; (8004714 <Flags+0x3c4>)
+ 8004670:	440a      	add	r2, r1
+ 8004672:	7852      	ldrb	r2, [r2, #1]
+ 8004674:	4290      	cmp	r0, r2
+ 8004676:	d310      	bcc.n	800469a <Flags+0x34a>
+ 8004678:	4a27      	ldr	r2, [pc, #156]	; (8004718 <Flags+0x3c8>)
+ 800467a:	440a      	add	r2, r1
+ 800467c:	7852      	ldrb	r2, [r2, #1]
+ 800467e:	4290      	cmp	r0, r2
+ 8004680:	d80b      	bhi.n	800469a <Flags+0x34a>
+ 8004682:	491e      	ldr	r1, [pc, #120]	; (80046fc <Flags+0x3ac>)
+ 8004684:	7809      	ldrb	r1, [r1, #0]
+ 8004686:	b141      	cbz	r1, 800469a <Flags+0x34a>
+ 8004688:	491d      	ldr	r1, [pc, #116]	; (8004700 <Flags+0x3b0>)
+ 800468a:	7809      	ldrb	r1, [r1, #0]
+ 800468c:	b129      	cbz	r1, 800469a <Flags+0x34a>
+ 800468e:	491d      	ldr	r1, [pc, #116]	; (8004704 <Flags+0x3b4>)
+ 8004690:	7809      	ldrb	r1, [r1, #0]
+ 8004692:	b911      	cbnz	r1, 800469a <Flags+0x34a>
+						if (getTimeLive.Minutes ==  offTime[i].Minutes)
+ 8004694:	4290      	cmp	r0, r2
+ 8004696:	f43f af70 	beq.w	800457a <Flags+0x22a>
+					if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds && hourFlag == 1 && minFlag == 1 && secFlag == 1)
+ 800469a:	4a1d      	ldr	r2, [pc, #116]	; (8004710 <Flags+0x3c0>)
+ 800469c:	7890      	ldrb	r0, [r2, #2]
+ 800469e:	eb03 0283 	add.w	r2, r3, r3, lsl #2
+ 80046a2:	0091      	lsls	r1, r2, #2
+ 80046a4:	4a1b      	ldr	r2, [pc, #108]	; (8004714 <Flags+0x3c4>)
+ 80046a6:	440a      	add	r2, r1
+ 80046a8:	7892      	ldrb	r2, [r2, #2]
+ 80046aa:	4290      	cmp	r0, r2
+ 80046ac:	d3ae      	bcc.n	800460c <Flags+0x2bc>
+ 80046ae:	4a1a      	ldr	r2, [pc, #104]	; (8004718 <Flags+0x3c8>)
+ 80046b0:	440a      	add	r2, r1
+ 80046b2:	7892      	ldrb	r2, [r2, #2]
+ 80046b4:	4290      	cmp	r0, r2
+ 80046b6:	d8a9      	bhi.n	800460c <Flags+0x2bc>
+ 80046b8:	4910      	ldr	r1, [pc, #64]	; (80046fc <Flags+0x3ac>)
+ 80046ba:	7809      	ldrb	r1, [r1, #0]
+ 80046bc:	2900      	cmp	r1, #0
+ 80046be:	d0a5      	beq.n	800460c <Flags+0x2bc>
+ 80046c0:	490f      	ldr	r1, [pc, #60]	; (8004700 <Flags+0x3b0>)
+ 80046c2:	7809      	ldrb	r1, [r1, #0]
+ 80046c4:	2900      	cmp	r1, #0
+ 80046c6:	d0a1      	beq.n	800460c <Flags+0x2bc>
+ 80046c8:	490e      	ldr	r1, [pc, #56]	; (8004704 <Flags+0x3b4>)
+ 80046ca:	7809      	ldrb	r1, [r1, #0]
+ 80046cc:	2900      	cmp	r1, #0
+ 80046ce:	d09d      	beq.n	800460c <Flags+0x2bc>
+						if (getTimeLive.Seconds ==  offTime[i].Seconds)
+ 80046d0:	4290      	cmp	r0, r2
+ 80046d2:	d19b      	bne.n	800460c <Flags+0x2bc>
+							hourFlag = 0;
+ 80046d4:	2200      	movs	r2, #0
+ 80046d6:	4909      	ldr	r1, [pc, #36]	; (80046fc <Flags+0x3ac>)
+ 80046d8:	700a      	strb	r2, [r1, #0]
+							minFlag = 0;
+ 80046da:	4909      	ldr	r1, [pc, #36]	; (8004700 <Flags+0x3b0>)
+ 80046dc:	700a      	strb	r2, [r1, #0]
+							secFlag = 0;
+ 80046de:	4909      	ldr	r1, [pc, #36]	; (8004704 <Flags+0x3b4>)
+ 80046e0:	700a      	strb	r2, [r1, #0]
+							heaterState = 0;
+ 80046e2:	4909      	ldr	r1, [pc, #36]	; (8004708 <Flags+0x3b8>)
+ 80046e4:	800a      	strh	r2, [r1, #0]
+ 80046e6:	e791      	b.n	800460c <Flags+0x2bc>
+						heaterState = 0;
+ 80046e8:	2100      	movs	r1, #0
+ 80046ea:	4a07      	ldr	r2, [pc, #28]	; (8004708 <Flags+0x3b8>)
+ 80046ec:	8011      	strh	r1, [r2, #0]
+ 80046ee:	e79a      	b.n	8004626 <Flags+0x2d6>
 				switchHeater();
- 800466e:	f7fe fd7d 	bl	800316c <switchHeater>
- 8004672:	e73b      	b.n	80044ec <Flags+0x19c>
+ 80046f0:	f7fe fd3c 	bl	800316c <switchHeater>
+ 80046f4:	e6fa      	b.n	80044ec <Flags+0x19c>
 			i = 0;
- 8004674:	2200      	movs	r2, #0
- 8004676:	6022      	str	r2, [r4, #0]
- 8004678:	e747      	b.n	800450a <Flags+0x1ba>
- 800467a:	bf00      	nop
- 800467c:	20000046 	.word	0x20000046
- 8004680:	20000040 	.word	0x20000040
- 8004684:	2000022c 	.word	0x2000022c
- 8004688:	20000244 	.word	0x20000244
- 800468c:	200001dc 	.word	0x200001dc
+ 80046f6:	2200      	movs	r2, #0
+ 80046f8:	6022      	str	r2, [r4, #0]
+ 80046fa:	e706      	b.n	800450a <Flags+0x1ba>
+ 80046fc:	20000024 	.word	0x20000024
+ 8004700:	20000025 	.word	0x20000025
+ 8004704:	20000026 	.word	0x20000026
+ 8004708:	20000046 	.word	0x20000046
+ 800470c:	20000040 	.word	0x20000040
+ 8004710:	2000022c 	.word	0x2000022c
+ 8004714:	20000244 	.word	0x20000244
+ 8004718:	200001dc 	.word	0x200001dc
 
-08004690 <Reset_Handler>:
+0800471c <Reset_Handler>:
 
     .section	.text.Reset_Handler
 	.weak	Reset_Handler
 	.type	Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack    /* Atollic update: set stack pointer */
- 8004690:	f8df d034 	ldr.w	sp, [pc, #52]	; 80046c8 <LoopForever+0x2>
+ 800471c:	f8df d034 	ldr.w	sp, [pc, #52]	; 8004754 <LoopForever+0x2>
 
 /* Copy the data segment initializers from flash to SRAM */
   movs	r1, #0
- 8004694:	2100      	movs	r1, #0
+ 8004720:	2100      	movs	r1, #0
   b	LoopCopyDataInit
- 8004696:	e003      	b.n	80046a0 <LoopCopyDataInit>
+ 8004722:	e003      	b.n	800472c <LoopCopyDataInit>
 
-08004698 <CopyDataInit>:
+08004724 <CopyDataInit>:
 
 CopyDataInit:
 	ldr	r3, =_sidata
- 8004698:	4b0c      	ldr	r3, [pc, #48]	; (80046cc <LoopForever+0x6>)
+ 8004724:	4b0c      	ldr	r3, [pc, #48]	; (8004758 <LoopForever+0x6>)
 	ldr	r3, [r3, r1]
- 800469a:	585b      	ldr	r3, [r3, r1]
+ 8004726:	585b      	ldr	r3, [r3, r1]
 	str	r3, [r0, r1]
- 800469c:	5043      	str	r3, [r0, r1]
+ 8004728:	5043      	str	r3, [r0, r1]
 	adds	r1, r1, #4
- 800469e:	3104      	adds	r1, #4
+ 800472a:	3104      	adds	r1, #4
 
-080046a0 <LoopCopyDataInit>:
+0800472c <LoopCopyDataInit>:
 
 LoopCopyDataInit:
 	ldr	r0, =_sdata
- 80046a0:	480b      	ldr	r0, [pc, #44]	; (80046d0 <LoopForever+0xa>)
+ 800472c:	480b      	ldr	r0, [pc, #44]	; (800475c <LoopForever+0xa>)
 	ldr	r3, =_edata
- 80046a2:	4b0c      	ldr	r3, [pc, #48]	; (80046d4 <LoopForever+0xe>)
+ 800472e:	4b0c      	ldr	r3, [pc, #48]	; (8004760 <LoopForever+0xe>)
 	adds	r2, r0, r1
- 80046a4:	1842      	adds	r2, r0, r1
+ 8004730:	1842      	adds	r2, r0, r1
 	cmp	r2, r3
- 80046a6:	429a      	cmp	r2, r3
+ 8004732:	429a      	cmp	r2, r3
 	bcc	CopyDataInit
- 80046a8:	d3f6      	bcc.n	8004698 <CopyDataInit>
+ 8004734:	d3f6      	bcc.n	8004724 <CopyDataInit>
 	ldr	r2, =_sbss
- 80046aa:	4a0b      	ldr	r2, [pc, #44]	; (80046d8 <LoopForever+0x12>)
+ 8004736:	4a0b      	ldr	r2, [pc, #44]	; (8004764 <LoopForever+0x12>)
 	b	LoopFillZerobss
- 80046ac:	e002      	b.n	80046b4 <LoopFillZerobss>
+ 8004738:	e002      	b.n	8004740 <LoopFillZerobss>
 
-080046ae <FillZerobss>:
+0800473a <FillZerobss>:
 /* Zero fill the bss segment. */
 FillZerobss:
 	movs	r3, #0
- 80046ae:	2300      	movs	r3, #0
+ 800473a:	2300      	movs	r3, #0
 	str	r3, [r2], #4
- 80046b0:	f842 3b04 	str.w	r3, [r2], #4
+ 800473c:	f842 3b04 	str.w	r3, [r2], #4
 
-080046b4 <LoopFillZerobss>:
+08004740 <LoopFillZerobss>:
 
 LoopFillZerobss:
 	ldr	r3, = _ebss
- 80046b4:	4b09      	ldr	r3, [pc, #36]	; (80046dc <LoopForever+0x16>)
+ 8004740:	4b09      	ldr	r3, [pc, #36]	; (8004768 <LoopForever+0x16>)
 	cmp	r2, r3
- 80046b6:	429a      	cmp	r2, r3
+ 8004742:	429a      	cmp	r2, r3
 	bcc	FillZerobss
- 80046b8:	d3f9      	bcc.n	80046ae <FillZerobss>
+ 8004744:	d3f9      	bcc.n	800473a <FillZerobss>
 
 /* Call the clock system intitialization function.*/
     bl  SystemInit
- 80046ba:	f7ff fa69 	bl	8003b90 <SystemInit>
+ 8004746:	f7ff fa23 	bl	8003b90 <SystemInit>
 /* Call static constructors */
     bl __libc_init_array
- 80046be:	f000 f811 	bl	80046e4 <__libc_init_array>
+ 800474a:	f000 f811 	bl	8004770 <__libc_init_array>
 /* Call the application's entry point.*/
 	bl	main
- 80046c2:	f7ff f8f9 	bl	80038b8 <main>
+ 800474e:	f7ff f8b3 	bl	80038b8 <main>
 
-080046c6 <LoopForever>:
+08004752 <LoopForever>:
 
 LoopForever:
     b LoopForever
- 80046c6:	e7fe      	b.n	80046c6 <LoopForever>
+ 8004752:	e7fe      	b.n	8004752 <LoopForever>
   ldr   sp, =_estack    /* Atollic update: set stack pointer */
- 80046c8:	20003000 	.word	0x20003000
+ 8004754:	20003000 	.word	0x20003000
 	ldr	r3, =_sidata
- 80046cc:	080047a4 	.word	0x080047a4
+ 8004758:	08004830 	.word	0x08004830
 	ldr	r0, =_sdata
- 80046d0:	20000000 	.word	0x20000000
+ 800475c:	20000000 	.word	0x20000000
 	ldr	r3, =_edata
- 80046d4:	20000008 	.word	0x20000008
+ 8004760:	20000008 	.word	0x20000008
 	ldr	r2, =_sbss
- 80046d8:	20000008 	.word	0x20000008
+ 8004764:	20000008 	.word	0x20000008
 	ldr	r3, = _ebss
- 80046dc:	2000041c 	.word	0x2000041c
+ 8004768:	2000041c 	.word	0x2000041c
 
-080046e0 <ADC1_2_IRQHandler>:
+0800476c <ADC1_2_IRQHandler>:
  * @retval : None
 */
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
 	b	Infinite_Loop
- 80046e0:	e7fe      	b.n	80046e0 <ADC1_2_IRQHandler>
+ 800476c:	e7fe      	b.n	800476c <ADC1_2_IRQHandler>
 	...
 
-080046e4 <__libc_init_array>:
- 80046e4:	b570      	push	{r4, r5, r6, lr}
- 80046e6:	4e0d      	ldr	r6, [pc, #52]	; (800471c <__libc_init_array+0x38>)
- 80046e8:	4c0d      	ldr	r4, [pc, #52]	; (8004720 <__libc_init_array+0x3c>)
- 80046ea:	1ba4      	subs	r4, r4, r6
- 80046ec:	10a4      	asrs	r4, r4, #2
- 80046ee:	2500      	movs	r5, #0
- 80046f0:	42a5      	cmp	r5, r4
- 80046f2:	d109      	bne.n	8004708 <__libc_init_array+0x24>
- 80046f4:	4e0b      	ldr	r6, [pc, #44]	; (8004724 <__libc_init_array+0x40>)
- 80046f6:	4c0c      	ldr	r4, [pc, #48]	; (8004728 <__libc_init_array+0x44>)
- 80046f8:	f000 f818 	bl	800472c <_init>
- 80046fc:	1ba4      	subs	r4, r4, r6
- 80046fe:	10a4      	asrs	r4, r4, #2
- 8004700:	2500      	movs	r5, #0
- 8004702:	42a5      	cmp	r5, r4
- 8004704:	d105      	bne.n	8004712 <__libc_init_array+0x2e>
- 8004706:	bd70      	pop	{r4, r5, r6, pc}
- 8004708:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
- 800470c:	4798      	blx	r3
- 800470e:	3501      	adds	r5, #1
- 8004710:	e7ee      	b.n	80046f0 <__libc_init_array+0xc>
- 8004712:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
- 8004716:	4798      	blx	r3
- 8004718:	3501      	adds	r5, #1
- 800471a:	e7f2      	b.n	8004702 <__libc_init_array+0x1e>
- 800471c:	0800479c 	.word	0x0800479c
- 8004720:	0800479c 	.word	0x0800479c
- 8004724:	0800479c 	.word	0x0800479c
- 8004728:	080047a0 	.word	0x080047a0
+08004770 <__libc_init_array>:
+ 8004770:	b570      	push	{r4, r5, r6, lr}
+ 8004772:	4e0d      	ldr	r6, [pc, #52]	; (80047a8 <__libc_init_array+0x38>)
+ 8004774:	4c0d      	ldr	r4, [pc, #52]	; (80047ac <__libc_init_array+0x3c>)
+ 8004776:	1ba4      	subs	r4, r4, r6
+ 8004778:	10a4      	asrs	r4, r4, #2
+ 800477a:	2500      	movs	r5, #0
+ 800477c:	42a5      	cmp	r5, r4
+ 800477e:	d109      	bne.n	8004794 <__libc_init_array+0x24>
+ 8004780:	4e0b      	ldr	r6, [pc, #44]	; (80047b0 <__libc_init_array+0x40>)
+ 8004782:	4c0c      	ldr	r4, [pc, #48]	; (80047b4 <__libc_init_array+0x44>)
+ 8004784:	f000 f818 	bl	80047b8 <_init>
+ 8004788:	1ba4      	subs	r4, r4, r6
+ 800478a:	10a4      	asrs	r4, r4, #2
+ 800478c:	2500      	movs	r5, #0
+ 800478e:	42a5      	cmp	r5, r4
+ 8004790:	d105      	bne.n	800479e <__libc_init_array+0x2e>
+ 8004792:	bd70      	pop	{r4, r5, r6, pc}
+ 8004794:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
+ 8004798:	4798      	blx	r3
+ 800479a:	3501      	adds	r5, #1
+ 800479c:	e7ee      	b.n	800477c <__libc_init_array+0xc>
+ 800479e:	f856 3025 	ldr.w	r3, [r6, r5, lsl #2]
+ 80047a2:	4798      	blx	r3
+ 80047a4:	3501      	adds	r5, #1
+ 80047a6:	e7f2      	b.n	800478e <__libc_init_array+0x1e>
+ 80047a8:	08004828 	.word	0x08004828
+ 80047ac:	08004828 	.word	0x08004828
+ 80047b0:	08004828 	.word	0x08004828
+ 80047b4:	0800482c 	.word	0x0800482c
 
-0800472c <_init>:
- 800472c:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 800472e:	bf00      	nop
- 8004730:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 8004732:	bc08      	pop	{r3}
- 8004734:	469e      	mov	lr, r3
- 8004736:	4770      	bx	lr
+080047b8 <_init>:
+ 80047b8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80047ba:	bf00      	nop
+ 80047bc:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80047be:	bc08      	pop	{r3}
+ 80047c0:	469e      	mov	lr, r3
+ 80047c2:	4770      	bx	lr
 
-08004738 <_fini>:
- 8004738:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 800473a:	bf00      	nop
- 800473c:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 800473e:	bc08      	pop	{r3}
- 8004740:	469e      	mov	lr, r3
- 8004742:	4770      	bx	lr
+080047c4 <_fini>:
+ 80047c4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80047c6:	bf00      	nop
+ 80047c8:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80047ca:	bc08      	pop	{r3}
+ 80047cc:	469e      	mov	lr, r3
+ 80047ce:	4770      	bx	lr

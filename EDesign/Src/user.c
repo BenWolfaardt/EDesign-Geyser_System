@@ -27,6 +27,9 @@ uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currentl
 volatile uint16_t s1Counter;
 volatile bool ms5Flag;
 volatile uint8_t ms5Counter;
+volatile bool minFlag = 0;
+volatile bool secFlag = 0;
+volatile bool hourFlag = 0;
 
 uint32_t lasttick;
 
@@ -545,19 +548,34 @@ void Flags(void)
 				i = 0;
 				while (i < 3)
 				{
-					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours)
+					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours && minFlag == 0)
 					{
-						if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes)
+						hourFlag = 1;
+						if (getTimeLive.Hours ==  offTime[i].Hours)
+							minFlag = 1;
+
+					}
+					if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes && hourFlag == 1 && minFlag == 1 && secFlag == 0)
+					{
+						if (getTimeLive.Minutes ==  offTime[i].Minutes)
+							secFlag = 1;
+
+					}
+					if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds && hourFlag == 1 && minFlag == 1 && secFlag == 1)
+					{
+						if (getTimeLive.Seconds ==  offTime[i].Seconds)
 						{
-							if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds)
-							{
-								heaterState = 1;
-								i = 4;
-							}
+							hourFlag = 0;
+							minFlag = 0;
+							secFlag = 0;
+							heaterState = 0;
 						}
 					}
+					if (hourFlag == 1 || minFlag == 1 || secFlag == 1)
+						heaterState = 1;
 					else
 						heaterState = 0;
+
 					i++;
 				}
 				switchHeater();

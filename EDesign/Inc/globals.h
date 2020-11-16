@@ -20,7 +20,7 @@ volatile bool rtcSecFlag;
 volatile bool i2cTxFlag;
 //volatile bool i2cErFlag;
 
-extern volatile bool ms3Flag;
+//extern volatile bool ms3Flag;
 
 //Variables
 volatile int16_t tempSetpoint;
