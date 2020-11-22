@@ -30,6 +30,9 @@ volatile uint8_t ms5Counter;
 volatile bool minFlag = 0;
 volatile bool secFlag = 0;
 volatile bool hourFlag = 0;
+volatile bool minEndFlag = 0;
+volatile bool secEndFlag = 0;
+volatile bool hourEndFlag = 0;
 
 uint32_t lasttick;
 
@@ -99,6 +102,9 @@ RTC_TimeTypeDef getTime;
 uint8_t HH_get;
 uint8_t mm_get;
 uint8_t ss_get;
+
+bool heaterFlag;
+uint8_t iCurrent;
 
 
 void UserInitialise(void)
@@ -244,9 +250,9 @@ void DecodeCmd()
 
 		timeL = 0;
 
-//		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
-//		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
-//		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
+		//		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
+		//		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
+		//		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &HH_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &mm_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &ss_set);
@@ -281,12 +287,12 @@ void DecodeCmd()
 		txBuf[0] = '$';	txBuf[1] = 'I';
 		txBuf[2] = ',';
 		charsL = 3;
-//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
-//		txBuf[charsL] = ','; charsL++;
-//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
-//		txBuf[charsL] = ','; charsL++;
-//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
-//		txBuf[charsL] = ','; charsL++;
+		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
+		//		txBuf[charsL] = ','; charsL++;
+		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
+		//		txBuf[charsL] = ','; charsL++;
+		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
+		//		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Hours, 2);
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Minutes, 2);
@@ -316,11 +322,13 @@ void DecodeCmd()
 		onTime[heatingWindow-1].Minutes = mm_on;
 		onTime[heatingWindow-1].Seconds = ss_on;
 		//HAL_RTC_SetTime(&hrtc, &onTime[heatingWindow-1], RTC_FORMAT_BCD);
+		onEpoch[heatingWindow-1] = timeToEpoch(getDateLive, onTime[heatingWindow-1]);
 
 		offTime[heatingWindow-1].Hours = HH_off;
 		offTime[heatingWindow-1].Minutes = mm_off;
 		offTime[heatingWindow-1].Seconds = ss_off;
 		//HAL_RTC_SetTime(&hrtc, &offTime[heatingWindow-1], RTC_FORMAT_BCD);
+		offEpoch[heatingWindow-1] = timeToEpoch(getDateLive, offTime[heatingWindow-1]);
 
 		txBuf[0] = '$';	txBuf[1] = 'J';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
@@ -542,39 +550,28 @@ void Flags(void)
 
 			halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
 			halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
+			//-------------------------------------------------------------------date when micro usb not connected check----------
+
 
 			if (scheduleState == 1)
 			{
+				tNow = timeToEpoch(getDateLive, getTimeLive);
+
 				i = 0;
+				heaterFlag = 0;
 				while (i < 3)
 				{
-					if (getTimeLive.Hours >=  onTime[i].Hours && getTimeLive.Hours <=  offTime[i].Hours && minFlag == 0)
+					if (tNow >= onEpoch[i] && tNow <= offEpoch[i] && heaterFlag == 0)
 					{
-						hourFlag = 1;
-						if (getTimeLive.Hours ==  offTime[i].Hours)
-							minFlag = 1;
-
-					}
-					if (getTimeLive.Minutes >=  onTime[i].Minutes && getTimeLive.Minutes <=  offTime[i].Minutes && hourFlag == 1 && minFlag == 1 && secFlag == 0)
-					{
-						if (getTimeLive.Minutes ==  offTime[i].Minutes)
-							secFlag = 1;
-
-					}
-					if (getTimeLive.Seconds >=  onTime[i].Seconds && getTimeLive.Seconds <=  offTime[i].Seconds && hourFlag == 1 && minFlag == 1 && secFlag == 1)
-					{
-						if (getTimeLive.Seconds ==  offTime[i].Seconds)
-						{
-							hourFlag = 0;
-							minFlag = 0;
-							secFlag = 0;
-							heaterState = 0;
-						}
-					}
-					if (hourFlag == 1 || minFlag == 1 || secFlag == 1)
 						heaterState = 1;
-					else
+						iCurrent = i;
+						heaterFlag = 1;
+					}
+					if (tNow >= offEpoch[iCurrent] && heaterFlag == 1)
+					{
 						heaterState = 0;
+						heaterFlag = 0;
+					}
 
 					i++;
 				}

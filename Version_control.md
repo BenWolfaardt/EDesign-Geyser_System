@@ -18,4 +18,7 @@ Version 4.1: RTC setup and partially coded <br/>
 Version 5.0: Blank slate project file <br/> 
 Version 5.1: Code added to blank slate <br/> 
 Version 5.2: 7 segment updated <br/> 
-Version 5.3: Scheduling coded with hysteresis <br/> 
+Version 5.3: LED setup <br/> 
+Version 5.4: Scheduling coded with hysteresis <br/> 
+Version 5.5: Scheduling streamlined, minor issues <br/> 
+Version 5.6: Scheduling finalised, no hysteresis <br/> 

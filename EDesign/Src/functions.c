@@ -7,6 +7,7 @@
 
 #include "functions.h"
 #include "globals.h"
+#include <time.h>
 
 uint32_t TempConv(uint32_t tempVal)
 {
@@ -145,4 +146,22 @@ void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL, uint8_t i)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8, (~(pins[i] >> 5) & 0b00000001)); //f
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_9, (~(pins[i] >> 6) & 0b00000001)); //g
 
+}
+
+time_t timeToEpoch(RTC_DateTypeDef dateLive, RTC_TimeTypeDef timeLive)
+{
+	//-----------------------------------------------------------------------possibly hardcode date protion
+
+	time_t epoch;
+	struct tm time;
+
+	time.tm_year = dateLive.Year - 1900;
+	time.tm_mon = dateLive.Month;
+	time.tm_mday = dateLive.Date;
+	time.tm_hour = timeLive.Hours;
+	time.tm_min = timeLive.Minutes;
+	time.tm_sec = timeLive.Seconds;
+	time.tm_isdst = 0;
+
+	return epoch = mktime(&time);
 }

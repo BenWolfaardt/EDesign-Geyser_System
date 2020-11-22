@@ -20,4 +20,6 @@ void writeToPins(uint8_t segments[], uint8_t pins[], int segmentsL, uint8_t i);
 void switchHeater(void);
 void switchValve(void);
 
+time_t timeToEpoch(RTC_DateTypeDef dateLive, RTC_TimeTypeDef timeLive);
+
 #endif /* FUNCTIONS_H_ */

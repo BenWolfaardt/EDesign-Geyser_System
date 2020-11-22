@@ -9,6 +9,7 @@
 #define GLOBALS_H_
 
 #include "stdbool.h"
+#include "time.h"
 
 //Volatile keyword because the variable is changed from interrupt handler
 //Flags
@@ -21,6 +22,12 @@ volatile bool i2cTxFlag;
 //volatile bool i2cErFlag;
 
 //extern volatile bool ms3Flag;
+
+extern volatile HAL_StatusTypeDef halStatus;
+extern RTC_HandleTypeDef hrtc;
+volatile time_t tNow;
+volatile time_t onEpoch[3];
+volatile time_t offEpoch[3];
 
 //Variables
 volatile int16_t tempSetpoint;
