@@ -50,6 +50,8 @@ uint8_t segmentsL = 0;
 
 float vrmsSum;	//----------------------------------------floats or uints???
 float irmsSum;
+float ambientTSum;
+float waterTSum;
 
 uint8_t adcCh;
 uint8_t sampleCntr;
@@ -60,8 +62,14 @@ uint32_t vrms_avg;
 uint32_t irms_avg;
 uint32_t vrms;
 uint32_t irms;
-uint32_t ambientT;
-uint32_t waterT;
+uint32_t vrmsV;
+uint32_t irmsA;
+uint32_t ambientTSample[RMS_WINDOW];
+uint32_t waterTSample[RMS_WINDOW];
+uint32_t ambientTavg;
+uint32_t waterTavg;
+//uint32_t ambientT;
+//uint32_t waterT;
 
 //-------------------------Flow Variables---------------------//
 uint32_t flowCounter;
@@ -257,9 +265,9 @@ void DecodeCmd()
 		timeL = StringTime2Int(cmdBuf+3+timeL, &mm_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &ss_set);
 
-		setDate.Year = YYYY_set;
-		setDate.Month = MM_set;
-		setDate.Date = DD_set;
+		//		setDate.Year = YYYY_set;
+		//		setDate.Month = MM_set;
+		//		setDate.Date = DD_set;
 		setTime.Hours = HH_set;
 		setTime.Minutes = mm_set;
 		setTime.Seconds = ss_set;
@@ -278,21 +286,12 @@ void DecodeCmd()
 
 	case 'I' : //Get time
 
-		//		halStatus = HAL_RTC_GetTime(&hrtc, &getTime, RTC_FORMAT_BCD);
-		//		halStatus = HAL_RTC_GetDate(&hrtc, &getDate, RTC_FORMAT_BCD);
-
 		getTime = getTimeLive;
 		getDate = getDateLive;
 
 		txBuf[0] = '$';	txBuf[1] = 'I';
 		txBuf[2] = ',';
 		charsL = 3;
-		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Year, 2);
-		//		txBuf[charsL] = ','; charsL++;
-		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Month, 2);
-		//		txBuf[charsL] = ','; charsL++;
-		//		charsL += Int2String(txBuf+charsL, (uint32_t) getDate.Date, 2);
-		//		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Hours, 2);
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, (uint32_t) getTime.Minutes, 2);
@@ -321,13 +320,11 @@ void DecodeCmd()
 		onTime[heatingWindow-1].Hours = HH_on;
 		onTime[heatingWindow-1].Minutes = mm_on;
 		onTime[heatingWindow-1].Seconds = ss_on;
-		//HAL_RTC_SetTime(&hrtc, &onTime[heatingWindow-1], RTC_FORMAT_BCD);
 		onEpoch[heatingWindow-1] = timeToEpoch(getDateLive, onTime[heatingWindow-1]);
 
 		offTime[heatingWindow-1].Hours = HH_off;
 		offTime[heatingWindow-1].Minutes = mm_off;
 		offTime[heatingWindow-1].Seconds = ss_off;
-		//HAL_RTC_SetTime(&hrtc, &offTime[heatingWindow-1], RTC_FORMAT_BCD);
 		offEpoch[heatingWindow-1] = timeToEpoch(getDateLive, offTime[heatingWindow-1]);
 
 		txBuf[0] = '$';	txBuf[1] = 'J';
@@ -339,13 +336,13 @@ void DecodeCmd()
 		// return string with format $K,1234,220000,25,66,567800,OFF,OPEN<CR><LF>
 		txBuf[0] = '$'; txBuf[1] = 'K'; txBuf[2] = ',';
 		charsL = 3;
-		charsL += Int2String(txBuf+charsL, irms, 10);
+		charsL += Int2String(txBuf+charsL, irmsA, 10);
 		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, vrms, 10);
+		charsL += Int2String(txBuf+charsL, vrmsV, 10);
 		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, TempConv(ambientT), 10);    // temp ambient
+		charsL += Int2String(txBuf+charsL, TempConv(ambientTavg), 10);    // temp ambient
 		txBuf[charsL] = ','; charsL++;
-		charsL += Int2String(txBuf+charsL, TempConv(waterT), 10);    // temp water
+		charsL += Int2String(txBuf+charsL, TempConv(waterTavg), 10);    // temp water
 		txBuf[charsL] = ','; charsL++;
 		charsL += Int2String(txBuf+charsL, totalFlow, 10);    // flow totalFlow
 		txBuf[charsL] = ','; charsL++;
@@ -441,11 +438,12 @@ void Flags(void)
 		}
 		else if (adcCh == 2)
 		{
-			ambientT = HAL_ADC_GetValue(&hadc1);
+			//--------------------------------------------------------------------------------------------------sample time
+			ambientTSample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
 		}
 		else if (adcCh == 3)
 		{
-			waterT = HAL_ADC_GetValue(&hadc1);
+			waterTSample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
 		}
 
 		adcCh++;
@@ -454,36 +452,35 @@ void Flags(void)
 			adcCh = 0;
 			sampleCntr++;
 
+			vrms = vsample[sampleCntr-1] * vsample[sampleCntr-1];
+			vrmsSum += vrms;
+			irms = isample[sampleCntr-1] * isample[sampleCntr-1];
+			irmsSum += irms;
+
+			ambientTSum += ambientTSample[sampleCntr-1];
+			waterTSum += waterTSample[sampleCntr-1];
+
 			if (sampleCntr >= RMS_WINDOW)
 			{
-				/*				vsample *= vsample;
-				temp12 += vsample;
-				temp12/=RMS_WINDOW;
-				temp12 = sqrt(temp12);
-				temp12*=3350;
-				temp12/=4095;
-				measuredRMS12 = temp12;
-				//vRMS12 = measuredRMS12*4.679287305;
-				vrms = measuredRMS12*4.679287305;
-				adcBuf12 = 0;
-
-				//iRMS13 = measuredRMS12*84.97807018;
-				irms = measuredRMS12*84.97807018;
-				adcBuf13 = 0;*/
 				sampleCntr = 0;
-				/*				//float vrmsSum;
-				//float irmsSum;
-				//uint16_t isample[RMS_WINDOW];
-				//uint16_t vsample[RMS_WINDOW];
-				//uint32_t vrms_avg;
-				//uint32_t irms_avg;
-				//uint32_t vrms;
-				//uint32_t irms;
-			}
-			else
-			{
-				vsample *= vsample;
-				temp12 += adc12;*/
+
+				vrmsSum /= RMS_WINDOW;
+				vrms_avg = sqrt(vrmsSum);
+				vrms_avg *= 3350;
+				vrms_avg /= 4095;
+				vrmsV = vrms_avg*84.97807018;
+
+				irmsSum /= RMS_WINDOW;
+				irms_avg = sqrt(irmsSum);
+				irms_avg *= 3350;
+				irms_avg /= 4095;
+				irmsA = irms_avg*4.679287305;
+
+				ambientTSum /= RMS_WINDOW;
+				ambientTavg = ambientTSum;
+
+				waterTSum /= RMS_WINDOW;
+				waterTavg = waterTSum;
 			}
 		}
 
@@ -552,11 +549,9 @@ void Flags(void)
 			halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
 			//-------------------------------------------------------------------date when micro usb not connected check----------
 
-
 			if (scheduleState == 1)
 			{
 				tNow = timeToEpoch(getDateLive, getTimeLive);
-
 				i = 0;
 				heaterFlag = 0;
 				while (i < 3)
@@ -572,18 +567,17 @@ void Flags(void)
 						heaterState = 0;
 						heaterFlag = 0;
 					}
-
 					i++;
 				}
 				switchHeater();
 			}
 		}
 
-		writeToPins(segementsSet, pinsValue, segmentsL, i);
-		i++;
+		writeToPins(segementsSet, pinsValue, segmentsL, j);
+		j++;
 
-		if (i == segmentsL)
-			i = 0;
+		if (j >= segmentsL)
+			j = 0;
 	}
 
 	//	if (rtcSecFlag == 1) //------------1 second period
