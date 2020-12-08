@@ -1,8 +1,8 @@
 functions.c:12:10:TempConv	0	static
-functions.c:23:6:switchHeater	8	static
-functions.c:28:6:switchValve	8	static
-functions.c:33:9:StringTime2Int	4	static
-functions.c:56:9:String2Int	8	static
-functions.c:86:10:Int2String	12	static
-functions.c:134:6:writeToPins	24	static
-functions.c:151:8:timeToEpoch	56	static
+functions.c:29:6:switchHeater	8	static
+functions.c:34:6:switchValve	8	static
+functions.c:39:9:StringTime2Int	4	static
+functions.c:62:9:String2Int	8	static
+functions.c:92:10:Int2String	12	static
+functions.c:140:6:writeToPins	24	static
+functions.c:157:8:timeToEpoch	56	static

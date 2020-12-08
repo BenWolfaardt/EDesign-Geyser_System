@@ -22,4 +22,5 @@ Version 5.3: LED setup <br/>
 Version 5.4: Scheduling coded with hysteresis <br/> 
 Version 5.5: Scheduling streamlined, minor issues <br/> 
 Version 5.6: Scheduling finalised, no hysteresis <br/> 
-Version 5.7: Apartment coding  <br/> 
+Version 5.7: Temperature sensors configured and other ADC's neatened  <br/> 
+Version 5.8: Flash memory coded, hysteresis working on  <br/> 

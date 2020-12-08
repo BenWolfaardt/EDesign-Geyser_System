@@ -19,6 +19,8 @@ volatile bool flowHighFlag;
 volatile bool firstHighFlag;
 volatile bool rtcSecFlag;
 volatile bool i2cTxFlag;
+volatile bool vrmsSmallFlag;
+volatile bool LoggerFlag;
 //volatile bool i2cErFlag;
 
 //extern volatile bool ms3Flag;
@@ -36,6 +38,8 @@ volatile int16_t tempSetpoint;
 volatile int16_t valveState;
 volatile int16_t heaterState;
 volatile int16_t scheduleState;
+volatile int16_t logState;
+volatile int16_t logCnt;
 //-------------------------
 
 uint8_t in; //7-segments
@@ -46,6 +50,9 @@ volatile uint8_t timeL; //time RTC
 int i, j;
 
 uint8_t charsL;
+
+//volatile uint16_t vMax;
+//volatile uint16_t vMin;
 
 
 #endif /* GLOBALS_H_ */

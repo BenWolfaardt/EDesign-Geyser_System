@@ -1,3 +1,4 @@
-user.c:118:6:UserInitialise	8	static
-user.c:173:6:DecodeCmd	48	static
-user.c:397:6:Flags	56	static
+user.c:144:6:UserInitialise	8	static
+user.c:198:6:DecodeCmd	64	static
+user.c:471:6:Logging	24	static
+user.c:504:6:Flags	56	static

@@ -3,12 +3,18 @@
  *
  *  Created on: 11 May 2018
  *      Author: 18321933
+ *
+ *      Certain parts of the code were copied from the code on SunLearn that the lecturers were so kind to add.
+ *      This code could be in any of the header or class files and not just in this particular one.
  */
 
 #include "user.h"
 #include "math.h"
 #include "globals.h"
 #include "functions.h"
+#include "string.h"
+
+#include "stm32f3xx_hal_flash_ex.h"
 
 //-------------------------UART-----------------------------//
 #define cmdBufL 60   		// maximum length of a command string received on the UART
@@ -23,8 +29,10 @@ char* txStudentNo = "$A,18321933\r\n";
 uint16_t cmdBufPos;  		// this is the position in the cmdB where we are currently writing to
 
 //-------------------------Nested Flags---------------------//
-//volatile bool ms3Flag;
+volatile bool s1Flag;
 volatile uint16_t s1Counter;
+volatile bool s10Flag;
+volatile uint32_t s10Counter;
 volatile bool ms5Flag;
 volatile uint8_t ms5Counter;
 volatile bool minFlag = 0;
@@ -49,25 +57,33 @@ uint8_t segmentsL = 0;
 #define RMS_WINDOW 40
 
 float vrmsSum;	//----------------------------------------floats or uints???
+float vrmsSmallSum;
 float irmsSum;
 float ambientTSum;
 float waterTSum;
+float ambientTavg;
+float waterTavg;
+float ambientTSample[RMS_WINDOW];
+float waterTSample[RMS_WINDOW];
 
 uint8_t adcCh;
 uint8_t sampleCntr;
+uint8_t sampleSmallCntr;
+uint8_t tempCntr;
 
 uint16_t isample[RMS_WINDOW];
 uint16_t vsample[RMS_WINDOW];
-uint32_t vrms_avg;
-uint32_t irms_avg;
-uint32_t vrms;
-uint32_t irms;
+//uint32_t vrms_avg;
+//uint32_t irms_avg;
+float vrms;
+float vrmsSmall;
+float irms;
 uint32_t vrmsV;
 uint32_t irmsA;
-uint32_t ambientTSample[RMS_WINDOW];
-uint32_t waterTSample[RMS_WINDOW];
-uint32_t ambientTavg;
-uint32_t waterTavg;
+//uint32_t ambientTSample[RMS_WINDOW];
+//uint32_t waterTSample[RMS_WINDOW];
+//uint32_t ambientTavg;
+//uint32_t waterTavg;
 //uint32_t ambientT;
 //uint32_t waterT;
 
@@ -114,21 +130,30 @@ uint8_t ss_get;
 bool heaterFlag;
 uint8_t iCurrent;
 
+//-------------------------Memory Log Variables----------------------//
+uint32_t logHrs;
+uint32_t logMin;
+uint32_t logSec;
+uint32_t logAmbientT;
+uint32_t logWaterT;
+//uint32_t startAddress;
+uint32_t addressIndex;
+
+extern void FLASH_PageErase(uint32_t PageAddress);
 
 void UserInitialise(void)
 {
 	uartRxFlag = false;
 	tempSetpoint = 60;		// initial value
 
-	//---------------------Prof code--------------------------//
 	adcFlag = false;
 	adcCh = 0;
 	sampleCntr = 0;
 	irmsSum = 0;
 	vrmsSum = 0;
 
-	//digit = 0;
-	//---------------------Prof code--------------------------//
+# define startAddress  0x08009000
+	addressIndex = 0;
 
 	valveState = 0;
 	heaterState = 0;
@@ -211,8 +236,11 @@ void DecodeCmd()
 		break;
 
 	case 'E' : //Enable/disable logging to flash memory
-		String2Int(cmdBuf+3, (int16_t*) &valveState);
+		String2Int(cmdBuf+3, (int16_t*) &logState);
 		//-----------------------------------------------------------------------------------------------------------------must i actualy code something?
+		LoggerFlag = logState;
+		s10Counter = 0;
+
 		txBuf[0] = '$';	txBuf[1] = 'E';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
@@ -258,16 +286,10 @@ void DecodeCmd()
 
 		timeL = 0;
 
-		//		timeL = StringTime2Int(cmdBuf+5, &YYYY_set);
-		//		timeL = StringTime2Int(cmdBuf+5+timeL, &MM_set);
-		//		timeL = StringTime2Int(cmdBuf+5+timeL, &DD_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &HH_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &mm_set);
 		timeL = StringTime2Int(cmdBuf+3+timeL, &ss_set);
 
-		//		setDate.Year = YYYY_set;
-		//		setDate.Month = MM_set;
-		//		setDate.Date = DD_set;
 		setTime.Hours = HH_set;
 		setTime.Minutes = mm_set;
 		setTime.Seconds = ss_set;
@@ -275,9 +297,11 @@ void DecodeCmd()
 		//Update the Calendar (cancel write protection and enter init mode)
 		__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc); // Disable write protection
 		halStatus = RTC_EnterInitMode(&hrtc); // Enter init mode
-		halStatus = HAL_RTC_SetTime(&hrtc, &setTime, RTC_FORMAT_BCD);
-		halStatus = HAL_RTC_SetDate(&hrtc, &setDate, RTC_FORMAT_BCD);
+		halStatus = HAL_RTC_SetTime(&hrtc, &setTime, RTC_FORMAT_BIN);
+		halStatus = HAL_RTC_SetDate(&hrtc, &setDate, RTC_FORMAT_BIN);
 		__HAL_RTC_WRITEPROTECTION_ENABLE(&hrtc);
+
+		s1Counter = 0;
 
 		txBuf[0] = '$';	txBuf[1] = 'H';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
@@ -285,6 +309,9 @@ void DecodeCmd()
 		break;
 
 	case 'I' : //Get time
+
+		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BIN);
+		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BIN);
 
 		getTime = getTimeLive;
 		getDate = getDateLive;
@@ -379,19 +406,99 @@ void DecodeCmd()
 
 		txBuf[charsL] = '\r'; charsL++; txBuf[charsL] = '\n'; charsL++;
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, charsL, 1000);
-
 		break;
 
 	case 'L' : //Request log entry
-		String2Int(cmdBuf+3, (int16_t*) &valveState);
+		String2Int(cmdBuf+3, (int16_t*) &logCnt);
 
-		switchValve();
+		//		logHrs = getTimeLive.Hours;
+		//		logMin = getTimeLive.Minutes;
+		//		logSec = getTimeLive.Seconds;
+		//		logAmbientT = TempConv(ambientTavg);
+		//		logWaterT = TempConv(waterTavg);
 
-		txBuf[0] = '$';	txBuf[1] = 'B';
+		logHrs = *(uint32_t*)(startAddress+(40*logCnt));
+		logMin = *(uint32_t*)(startAddress+(40*logCnt)+4);
+		logSec = *(uint32_t*)(startAddress+(40*logCnt)+8);
+		irmsA = *(uint32_t*)(startAddress+(40*logCnt)+12);
+		vrmsV = *(uint32_t*)(startAddress+(40*logCnt)+16);
+		logAmbientT = *(uint32_t*)(startAddress+(40*logCnt)+20);
+		logWaterT = *(uint32_t*)(startAddress+(40*logCnt)+24);
+		totalFlow = *(uint32_t*)(startAddress+(40*logCnt)+28);
+		valveState = *(uint32_t*)(startAddress+(40*logCnt)+32);
+		heaterState = *(uint32_t*)(startAddress+(40*logCnt)+36);
+
+		if (heaterState == 0U && valveState == 0U)
+		{
+			sprintf(txBuf,"$L,%lu,%lu,%lu,%lu,%lu,%lu,%lu,%lu,OFF,CLOSED\r\n",logHrs,logMin,logSec,irmsA,vrmsV,logAmbientT,logWaterT,totalFlow);
+			//sprintf(txBuf,"$L,%d,%d,%d,%d,%d,%d,%d,%d,OFF,CLOSED\r\n",(int)logHrs,(int)logMin,(int)logSec,(int)irmsA,(int)vrmsV,(int)logAmbientT,(int)logWaterT,(int)totalFlow);
+			HAL_UART_Transmit(&huart1, (uint8_t*) txBuf, strlen(txBuf), 1000);
+		}
+		if(heaterState == 0U && valveState == 1U)
+		{
+			sprintf(txBuf,"$L,%lu,%lu,%lu,%lu,%lu,%lu,%lu,%lu,OFF,OPEN\r\n",logHrs,logMin,logSec,irmsA,vrmsV,logAmbientT,logWaterT,totalFlow);
+			//sprintf(txBuf,"$L,%d,%d,%d,%d,%d,%d,%d,%d,OFF,OPEN\r\n",(int)logHrs,(int)logMin,(int)logSec,(int)irmsA,(int)vrmsV,(int)logAmbientT,(int)logWaterT,(int)totalFlow);
+
+			HAL_UART_Transmit(&huart1, (uint8_t*) txBuf, strlen(txBuf), 1000);
+		}
+		if(heaterState == 1U && valveState == 0U)
+		{
+			sprintf(txBuf,"$L,%lu,%lu,%lu,%lu,%lu,%lu,%lu,%lu,ON,CLOSED\r\n",logHrs,logMin,logSec,irmsA,vrmsV,logAmbientT,logWaterT,totalFlow);
+			//sprintf(txBuf,"$L,%d,%d,%d,%d,%d,%d,%d,%d,ON,CLOSED\r\n",(int)logHrs,(int)logMin,(int)logSec,(int)irmsA,(int)vrmsV,(int)logAmbientT,(int)logWaterT,(int)totalFlow);
+
+			HAL_UART_Transmit(&huart1, (uint8_t*) txBuf, strlen(txBuf), 1000);
+		}
+		if(heaterState == 1U && valveState == 1U)
+		{
+			sprintf(txBuf,"$L,%lu,%lu,%lu,%lu,%lu,%lu,%lu,%lu,ON,OPEN\r\n",logHrs,logMin,logSec,irmsA,vrmsV,logAmbientT,logWaterT,totalFlow);
+			//sprintf(txBuf,"$L,%d,%d,%d,%d,%d,%d,%d,%d,ON,OPEN\r\n",(int)logHrs,(int)logMin,(int)logSec,(int)irmsA,(int)vrmsV,(int)logAmbientT,(int)logWaterT,(int)totalFlow);
+
+			HAL_UART_Transmit(&huart1, (uint8_t*) txBuf, strlen(txBuf), 1000);
+		}
+		break;
+
+	case 'Z' : //Clear log
+		HAL_FLASH_Unlock();
+		FLASH_PageErase(startAddress);
+		HAL_FLASH_Lock();
+		txBuf[0] = '$';	txBuf[1] = 'Z';
 		txBuf[2] = '\r'; txBuf[3] = '\n';
 		HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, 4, 1000);
 		break;
 	}
+}
+
+void Logging(void)
+{
+	halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BIN);
+	halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BIN);
+	logAmbientT = TempConv(ambientTavg);
+	logWaterT = TempConv(waterTavg);
+
+	HAL_FLASH_Unlock();
+
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(getTimeLive.Hours));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(getTimeLive.Minutes));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(getTimeLive.Seconds));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(irmsA));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(vrmsV));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(logAmbientT));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(logWaterT));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(totalFlow));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(valveState));
+	addressIndex++;
+	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,(startAddress+4*addressIndex),(uint32_t)(heaterState));
+	addressIndex++;
+
+	HAL_FLASH_Lock();
 }
 
 void Flags(void)
@@ -431,6 +538,9 @@ void Flags(void)
 		if (adcCh == 0)
 		{
 			vsample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
+			//Result := ((Input - InputLow) / (InputHigh - InputLow)) * (OutputHigh - OutputLow) + OutputLow;
+			//vsample[sampleCntr] = ((vsample[sampleCntr]-298)/(3871-298))*(220000+220000)-220000;
+
 		}
 		else if (adcCh == 1)
 		{
@@ -439,42 +549,68 @@ void Flags(void)
 		else if (adcCh == 2)
 		{
 			//--------------------------------------------------------------------------------------------------sample time
-			ambientTSample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
+			ambientTSample[tempCntr] = HAL_ADC_GetValue(&hadc1);
 		}
 		else if (adcCh == 3)
 		{
-			waterTSample[sampleCntr] = HAL_ADC_GetValue(&hadc1);
+			waterTSample[tempCntr] = HAL_ADC_GetValue(&hadc1);
 		}
 
 		adcCh++;
 		if (adcCh >= 4)
 		{
 			adcCh = 0;
+
+			vrms = ((float) (vsample[sampleCntr]-660)/(3620-660))*(220000+220000)-220000;
+			vrmsSum += vrms * vrms;
+
+			if (vsample[sampleCntr] > 1880 && vsample[sampleCntr] < 2260)
+			{
+				sampleSmallCntr++;
+				if (sampleSmallCntr > 36)
+				{
+					vrmsSmallFlag = 1;
+				}
+				vrmsSmall = ((float) (vsample[sampleCntr]-1890)/(2250-1890))*(27500+27500)-27500;
+				vrmsSmallSum += vrmsSmall * vrmsSmall;
+			}
+
+			irms = ((float) (isample[sampleCntr]-660)/(3620-660))*(13000+13000)-13000;
+			irmsSum += irms * irms;
+
+			ambientTSum += ambientTSample[tempCntr];
+			waterTSum += waterTSample[tempCntr];
+
 			sampleCntr++;
-
-			vrms = vsample[sampleCntr-1] * vsample[sampleCntr-1];
-			vrmsSum += vrms;
-			irms = isample[sampleCntr-1] * isample[sampleCntr-1];
-			irmsSum += irms;
-
-			ambientTSum += ambientTSample[sampleCntr-1];
-			waterTSum += waterTSample[sampleCntr-1];
 
 			if (sampleCntr >= RMS_WINDOW)
 			{
 				sampleCntr = 0;
+				sampleSmallCntr = 0;
+
+				tempCntr++;
+
+				if (tempCntr >= RMS_WINDOW)
+				{
+					tempCntr = 0;
+				}
 
 				vrmsSum /= RMS_WINDOW;
-				vrms_avg = sqrt(vrmsSum);
-				vrms_avg *= 3350;
-				vrms_avg /= 4095;
-				vrmsV = vrms_avg*84.97807018;
+				vrmsV = sqrt(vrmsSum);
+				vrmsSum = 0;
+
+				if (vrmsSmallFlag == 1)
+				{
+					vrmsSmallFlag = 0;
+
+					vrmsSmallSum /= RMS_WINDOW;
+					vrmsV = sqrt(vrmsSmallSum);
+					vrmsSmallSum = 0;
+				}
 
 				irmsSum /= RMS_WINDOW;
-				irms_avg = sqrt(irmsSum);
-				irms_avg *= 3350;
-				irms_avg /= 4095;
-				irmsA = irms_avg*4.679287305;
+				irmsA = sqrt(irmsSum);
+				irmsSum = 0;
 
 				ambientTSum /= RMS_WINDOW;
 				ambientTavg = ambientTSum;
@@ -544,33 +680,14 @@ void Flags(void)
 		if (s1Counter >= 1000)
 		{
 			s1Counter = 0;
+			s1Flag = 1;
+		}
 
-			halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
-			halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
-			//-------------------------------------------------------------------date when micro usb not connected check----------
-
-			if (scheduleState == 1)
-			{
-				tNow = timeToEpoch(getDateLive, getTimeLive);
-				i = 0;
-				heaterFlag = 0;
-				while (i < 3)
-				{
-					if (tNow >= onEpoch[i] && tNow <= offEpoch[i] && heaterFlag == 0)
-					{
-						heaterState = 1;
-						iCurrent = i;
-						heaterFlag = 1;
-					}
-					if (tNow >= offEpoch[iCurrent] && heaterFlag == 1)
-					{
-						heaterState = 0;
-						heaterFlag = 0;
-					}
-					i++;
-				}
-				switchHeater();
-			}
+		s10Counter++;
+		if (s10Counter >= 10000)
+		{
+			s10Counter = 0;
+			s10Flag = 1;
 		}
 
 		writeToPins(segementsSet, pinsValue, segmentsL, j);
@@ -580,14 +697,47 @@ void Flags(void)
 			j = 0;
 	}
 
-	//	if (rtcSecFlag == 1) //------------1 second period
-	//	{
-	//		rtcSecFlag = 0;
-	//		tick = 0;
-	//
-	//		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BCD);
-	//		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BCD);
-	//	}
+	if (s1Flag == 1)
+	{
+		s1Flag = 0;
+
+		halStatus = HAL_RTC_GetTime(&hrtc, &getTimeLive, RTC_FORMAT_BIN);
+		halStatus = HAL_RTC_GetDate(&hrtc, &getDateLive, RTC_FORMAT_BIN);
+		//-------------------------------------------------------------------date when micro usb not connected check----------
+
+		if (scheduleState == 1)
+		{
+			tNow = timeToEpoch(getDateLive, getTimeLive);
+			i = 0;
+			heaterFlag = 0;
+			while (i < 3)
+			{
+				if (tNow >= onEpoch[i] && tNow <= offEpoch[i] && heaterFlag == 0)
+				{
+					heaterState = 1;
+					iCurrent = i;
+					heaterFlag = 1;
+				}
+				if (tNow >= offEpoch[iCurrent] && heaterFlag == 1)
+				{
+					heaterState = 0;
+					heaterFlag = 0;
+				}
+				i++;
+			}
+			switchHeater();
+		}
+	}
+
+	if (s10Flag)
+	{
+		s10Flag	= 0;
+
+		if (LoggerFlag)
+		{
+			Logging();
+		}
+	}
 
 	//		buffer[0] = 0x00;
 

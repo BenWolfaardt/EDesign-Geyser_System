@@ -11,13 +11,19 @@
 
 uint32_t TempConv(uint32_t tempVal)
 {
-	uint32_t temp = 0;
-	uint32_t scale = 0;
+	//uint32_t temp = 0;
+	//uint32_t scale = 0;
 
-	temp = ((100*tempVal)>>7)+((100*tempVal)>>12);
-	scale = (temp-500)/10;
+//	temp = ((100*tempVal)>>7)+((100*tempVal)>>12);
+//	scale = (temp-500)/10;
 
-	return scale;
+	tempVal = tempVal*3300;
+	tempVal = tempVal/4095;
+	tempVal = (tempVal - 500)/10;
+	//Twatter = tempVal;
+
+//	return scale;
+	return tempVal;
 }
 
 void switchHeater(void)
