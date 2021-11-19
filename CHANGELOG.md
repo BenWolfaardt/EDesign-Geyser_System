@@ -10,3 +10,5 @@
 * Rewrite module commercioMint
 * Add migrate 2.2.0
 * Add module update
+
+// TODO: see [this](https://github.com/egoist/changelog.md) for inspiration.
